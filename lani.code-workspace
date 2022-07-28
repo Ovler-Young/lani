@@ -1,5 +1,5 @@
 {
-	"folders": [
+  "folders": [
     {
       "name": "✨ root",
       "path": "."
@@ -39,30 +39,32 @@
     {
       "name": "🚚 @lani/all-in-one",
       "path": "apps/all-in-one"
+    },
+    {
+      "name": "📖 @lani/docs",
+      "path": "docs"
     }
   ],
-	"settings": {
-		"files.associations": {
-			"rush.json": "jsonc",
-			"**/common/config/rush/*.json": "jsonc",
+  "settings": {
+    "files.associations": {
+      "rush.json": "jsonc",
+      "**/common/config/rush/*.json": "jsonc",
       "**/manifests/**/*.yaml.hbs": "yaml"
-		},
-		"json.schemas": [
-			{
-				"fileMatch": [
-					"**/laniconf.json"
-				],
-				"url": "../../tools/cli/dist/schema/laniconf.schema.json"
-			}
-		]
-	},
-	"extensions": {
-		"recommendations": [
-			"esbenp.prettier-vscode",
-			"redhat.vscode-yaml",
-			"eamodio.gitlens",
-			"ms-kubernetes-tools.vscode-kubernetes-tools",
-			"folke.vscode-monorepo-workspace"
-		]
-	}
+    },
+    "json.schemas": [
+      {
+        "fileMatch": ["**/laniconf.json"],
+        "url": "../../tools/cli/dist/schema/laniconf.schema.json"
+      }
+    ]
+  },
+  "extensions": {
+    "recommendations": [
+      "esbenp.prettier-vscode",
+      "redhat.vscode-yaml",
+      "eamodio.gitlens",
+      "ms-kubernetes-tools.vscode-kubernetes-tools",
+      "folke.vscode-monorepo-workspace"
+    ]
+  }
 }

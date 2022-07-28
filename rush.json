@@ -487,6 +487,10 @@
     {
       "packageName": "@lani/all-in-one",
       "projectFolder": "apps/all-in-one"
+    },
+    {
+      "packageName": "@lani/docs",
+      "projectFolder": "docs"
     }
   ]
 }
