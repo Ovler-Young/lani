@@ -115,3 +115,7 @@ query ListJellyfinFolders {
     }
   }
 }
+
+mutation WriteSeasonMetadata($id: Int!) {
+  writeMetadata(seasonId: $id)
+}

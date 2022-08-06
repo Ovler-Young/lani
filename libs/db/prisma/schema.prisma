@@ -54,39 +54,46 @@ model Image {
 }
 
 model Season {
-  id                 Int              @id @default(autoincrement())
-  title              String           @unique @default("")
-  description        String           @default("")
-  infoSource         MetadataSource   @default(MANUAL) @map("info_source")
-  tags               String[]         @db.VarChar
-  createdAt          DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
-  bilibiliThmId      String           @default("") @map("bilibili_thm_id")
-  bilibiliMainlandId String           @default("") @map("bilibili_mainland_id")
-  bangumiId          String           @default("") @map("bangumi_id")
-  mikanAnimeId       String           @default("") @map("mikan_anime_id")
-  isMonitoring       Boolean          @default(true) @map("is_monitoring")
-  yearAndSemester    String           @default("") @map("year_and_semester") @db.VarChar(16)
-  weekday            Int?
-  airTime            String           @default("") @map("air_time") @db.VarChar
-  tvdbId             String           @default("") @map("tvdb_id")
-  tvdbSeason         Int?             @map("tvdb_season")
-  episodesSource     MetadataSource   @default(MANUAL) @map("episodes_source")
-  seasonRoot         String?          @map("season_root")
-  jellyfinId         String           @default("") @map("jellyfin_id")
-  jellyfinFolderId   Int              @map("jellyfin_folder_id")
-  posterImageId      Int?             @map("poster_image_id")
-  bannerImageId      Int?             @map("banner_image_id")
-  fanartImageId      Int?             @map("fanart_image_id")
-  episodesLastSync   DateTime?        @map("episodes_last_sync") @db.Timestamptz(6)
-  needDownloadCc     Boolean          @default(false) @map("need_download_cc")
-  notifyMissing      Boolean          @default(true) @map("notify_missing")
-  notifyPublish      Boolean          @default(true) @map("notify_publish")
-  bannerImage        Image?           @relation("imagesToseasons_banner_image_id", fields: [bannerImageId], references: [id])
-  fanartImage        Image?           @relation("imagesToseasons_fanart_image_id", fields: [fanartImageId], references: [id])
-  jellyfinFolder     JellyfinFolder   @relation("jellyfin_foldersToseasons", fields: [jellyfinFolderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  posterImage        Image?           @relation("imagesToseasons_poster_image_id", fields: [posterImageId], references: [id])
-  downloadSources    DownloadSource[]
-  episodes           Episode[]
+  id    Int    @id @default(autoincrement())
+  title String @unique @default("")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  bilibiliThmId      String         @default("") @map("bilibili_thm_id")
+  bilibiliMainlandId String         @default("") @map("bilibili_mainland_id")
+  bangumiId          String         @default("") @map("bangumi_id")
+  mikanAnimeId       String         @default("") @map("mikan_anime_id")
+  tvdbId             String         @default("") @map("tvdb_id")
+  tvdbSeason         Int?           @map("tvdb_season")
+  jellyfinFolderId   Int            @map("jellyfin_folder_id")
+  jellyfinId         String         @default("") @map("jellyfin_id")
+  jellyfinFolder     JellyfinFolder @relation("jellyfin_foldersToseasons", fields: [jellyfinFolderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  infoSource      MetadataSource @default(MANUAL) @map("info_source")
+  description     String         @default("")
+  tags            String[]       @db.VarChar
+  yearAndSemester String         @default("") @map("year_and_semester") @db.VarChar(16)
+  weekday         Int?
+  airTime         String         @default("") @map("air_time") @db.VarChar
+  posterImageId   Int?           @map("poster_image_id")
+  bannerImageId   Int?           @map("banner_image_id")
+  fanartImageId   Int?           @map("fanart_image_id")
+  posterImage     Image?         @relation("imagesToseasons_poster_image_id", fields: [posterImageId], references: [id])
+  bannerImage     Image?         @relation("imagesToseasons_banner_image_id", fields: [bannerImageId], references: [id])
+  fanartImage     Image?         @relation("imagesToseasons_fanart_image_id", fields: [fanartImageId], references: [id])
+
+  lastWriteToDisk DateTime? @map("last_write_to_disk") @db.Timestamptz(6)
+  lastWriteTitle  String?   @map("last_write_title")
+
+  isMonitoring    Boolean          @default(true) @map("is_monitoring")
+  needDownloadCc  Boolean          @default(false) @map("need_download_cc")
+  notifyMissing   Boolean          @default(true) @map("notify_missing")
+  notifyPublish   Boolean          @default(true) @map("notify_publish")
+  downloadSources DownloadSource[]
+
+  episodesSource   MetadataSource @default(MANUAL) @map("episodes_source")
+  episodesLastSync DateTime?      @map("episodes_last_sync") @db.Timestamptz(6)
+  episodes         Episode[]
 
   @@map("seasons")
 }

@@ -77,25 +77,6 @@ query GetSeasonById(
   }
 }
 
-query GetSeasonByIdAll($id: Int!) {
-  seasonById(id: $id) {
-    ...seasonConfigFields
-    ...seasonEpisodes
-  }
-}
-
-query GetSeasonByIdConfigOnly($id: Int!) {
-  seasonById(id: $id) {
-    ...seasonConfigFields
-  }
-}
-
-query GetSeasonByIdEpisodesOnly($id: Int!) {
-  seasonById(id: $id) {
-    ...seasonEpisodes
-  }
-}
-
 mutation UpdateSeasonById($id: Int!, $seasonPatch: SeasonPatch!) {
   updateSeasonById(input: { id: $id, seasonPatch: $seasonPatch }) {
     __typename
@@ -150,4 +131,10 @@ mutation SyncJellyfinSeriesId($seasonId: Int!) {
 
 mutation DownloadBilibiliCC($episodeId: Int!) {
   downloadBilibiliCC(episodeId: $episodeId)
+}
+
+query GetJellyfinIdById($id: Int!) {
+  seasonById(id: $id) {
+    jellyfinId
+  }
 }

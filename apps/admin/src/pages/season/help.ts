@@ -1,15 +1,15 @@
 import { calcEpisodeStatus, EpisodeStatus } from '@/constants/download-status';
 import {
   DisplayImageFieldsFragment,
-  GetSeasonByIdConfigOnlyQuery,
   GetSeasonByIdDocument,
-  GetSeasonByIdEpisodesOnlyQuery,
   MetadataSource,
   SeasonConfigFieldsFragment,
+  SeasonEpisodesFragment,
   SyncEpisodeDataDocument,
   SyncMetadataDocument,
   UpdateSeasonByIdDocument,
   UpdateSeasonDownloadSourcesDocument,
+  WriteSeasonMetadataDocument,
 } from '@/generated/types';
 import { ExtractNode, extractNode } from '@/utils/graphql';
 import { ProFormInstance } from '@ant-design/pro-form';
@@ -25,13 +25,10 @@ import {
   useState,
 } from 'react';
 
-export type Season = NonNullable<GetSeasonByIdConfigOnlyQuery['seasonById']>;
+export type Season = SeasonConfigFieldsFragment;
 
-type SeasonEpisodesOnly = NonNullable<
-  GetSeasonByIdEpisodesOnlyQuery['seasonById']
->;
 type RawEpisode = NonNullable<
-  ExtractNode<SeasonEpisodesOnly['episodesBySeasonId']>
+  ExtractNode<SeasonEpisodesFragment['episodesBySeasonId']>
 >;
 export type Episode = Omit<RawEpisode, 'downloadJobsByEpisodeId'> & {
   jobStatus: EpisodeStatus;
@@ -143,86 +140,6 @@ export function queryToFormValues({
   };
 }
 
-export function useOnFinish(id: number, reloadConfig: () => Promise<void>) {
-  const client = useApolloClient();
-
-  return useMemoizedFn(
-    async ({
-      isMonitoring,
-      jellyfinId,
-      mikanAnimeId,
-      title,
-      tvdbId,
-      tvdbSeason,
-      weekday,
-      year,
-      semester,
-      airTime,
-      bangumiId,
-      bilibiliMainlandId,
-      bilibiliThmId,
-      downloadSources,
-      infoSource,
-      episodesSource,
-      needDownloadCc,
-      notifyMissing,
-      notifyPublish,
-    }: // 这种只能同步的字段暂时不允许前端修改
-    // tags,
-    // description,
-    FormValues) => {
-      try {
-        await client.mutate({
-          mutation: UpdateSeasonByIdDocument,
-          variables: {
-            id,
-            seasonPatch: {
-              isMonitoring,
-              jellyfinId,
-              mikanAnimeId,
-              title,
-              tvdbId,
-              tvdbSeason: tvdbSeason ?? null,
-              weekday: weekday ? parseInt(weekday) : null,
-              yearAndSemester:
-                year && semester ? `${year}${semester.padStart(2, '0')}` : '',
-              airTime,
-              bangumiId,
-              bilibiliMainlandId,
-              bilibiliThmId,
-              // description,
-              infoSource,
-              episodesSource,
-              needDownloadCc,
-              notifyMissing,
-              notifyPublish,
-            },
-          },
-        });
-        await client.mutate({
-          mutation: UpdateSeasonDownloadSourcesDocument,
-          variables: {
-            input: {
-              seasonId: id,
-              sources: downloadSources.map(({ offset, ...source }) => ({
-                ...source,
-                offset,
-              })),
-            },
-          },
-        });
-        void message.success('保存成功');
-        void reloadConfig();
-        return true;
-      } catch (error) {
-        console.error(error);
-        void message.error('保存失败');
-        return false;
-      }
-    },
-  );
-}
-
 export const formItemProps: FormItemProps = {
   labelCol: {
     md: 5,
@@ -303,6 +220,25 @@ export function useSeasonPage(id: number) {
     updateTouched();
   });
 
+  const setValues = useMemoizedFn(
+    (
+      values:
+        | Season
+        | SeasonEpisodesFragment
+        | (Season & SeasonEpisodesFragment),
+    ) => {
+      if ('id' in values) {
+        setInitialValues(queryToFormValues(values));
+        reset();
+      }
+      if ('episodesBySeasonId' in values) {
+        setEpisodes(
+          (extractNode(values.episodesBySeasonId) ?? []).map(mapEpisode),
+        );
+      }
+    },
+  );
+
   const reload = useMemoizedFn(
     async ({
       withConfig = false,
@@ -322,17 +258,7 @@ export function useSeasonPage(id: number) {
       if (!data.seasonById) {
         return;
       }
-      if (data.seasonById.id) {
-        setInitialValues(queryToFormValues(data.seasonById));
-        reset();
-      }
-      if (data.seasonById.episodesBySeasonId) {
-        setEpisodes(
-          (extractNode(data.seasonById.episodesBySeasonId) ?? []).map(
-            mapEpisode,
-          ),
-        );
-      }
+      setValues(data.seasonById);
     },
   );
 
@@ -415,7 +341,83 @@ export function useSeasonPage(id: number) {
     }
   });
 
-  const submit = useOnFinish(id, reloadConfig);
+  const submit = useMemoizedFn(
+    async ({
+      isMonitoring,
+      mikanAnimeId,
+      title,
+      tvdbId,
+      tvdbSeason,
+      weekday,
+      year,
+      semester,
+      airTime,
+      bangumiId,
+      bilibiliMainlandId,
+      bilibiliThmId,
+      downloadSources,
+      infoSource,
+      episodesSource,
+      needDownloadCc,
+      notifyMissing,
+      notifyPublish,
+    }: FormValues) => {
+      try {
+        await client.mutate({
+          mutation: UpdateSeasonDownloadSourcesDocument,
+          variables: {
+            input: {
+              seasonId: id,
+              sources: downloadSources.map(({ offset, ...source }) => ({
+                ...source,
+                offset,
+              })),
+            },
+          },
+        });
+        await client.mutate({
+          mutation: UpdateSeasonByIdDocument,
+          variables: {
+            id,
+            seasonPatch: {
+              isMonitoring,
+              // jellyfinId,
+              mikanAnimeId,
+              title,
+              tvdbId,
+              tvdbSeason: tvdbSeason ?? null,
+              weekday: weekday ? parseInt(weekday) : null,
+              yearAndSemester:
+                year && semester ? `${year}${semester.padStart(2, '0')}` : '',
+              airTime,
+              bangumiId,
+              bilibiliMainlandId,
+              bilibiliThmId,
+              // description,
+              infoSource,
+              episodesSource,
+              needDownloadCc,
+              notifyMissing,
+              notifyPublish,
+            },
+          },
+        });
+        await client.mutate({
+          mutation: WriteSeasonMetadataDocument,
+          variables: {
+            id,
+          },
+        });
+        void message.success('保存成功');
+        void reloadConfig();
+        return true;
+      } catch (error) {
+        console.error(error);
+        void message.error('保存失败');
+        return false;
+      }
+    },
+  );
 
   const values: SeasonPageContextValues = useMemo(
     () => ({

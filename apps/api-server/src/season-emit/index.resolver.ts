@@ -1,6 +1,5 @@
 import { PrismaService } from '@/common/prisma.service';
 import { SeasonEmitService } from '@/season-emit/index.service';
-import { ConflictException } from '@nestjs/common';
 import { Args, ID, Mutation, Resolver } from '@nestjs/graphql';
 
 @Resolver()

@@ -3,14 +3,21 @@ import { PrismaService } from '@/common/prisma.service';
 import config from '@/config';
 import { SeasonWithJellyfinFolder } from '@/types/entities';
 import { JellyfinHelp } from '@/utils/JellyfinHelp';
-import { JellyfinFolder, Season } from '@lani/db';
 import { Injectable } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class SeasonJellyfinService {
   constructor(private prisma: PrismaService) {}
 
-  async refreshAfterUpdate({
+  async refreshAfterFolderRename({ jellyfinFolder }: SeasonWithJellyfinFolder) {
+    await JellyfinHelp.refreshItem({
+      itemId: jellyfinFolder.jellyfinId,
+      recursive: true,
+    });
+  }
+
+  async refreshAfterWriteToDisk({
     jellyfinId,
     jellyfinFolder,
   }: SeasonWithJellyfinFolder) {
@@ -56,6 +63,7 @@ export class SeasonJellyfinService {
     if (id === jellyfinId) {
       return true;
     }
+    console.log(`jellyfin season id for season '${title}' is ${id}`);
     await this.prisma.season.update({
       where: { id: seasonId },
       data: {
@@ -63,5 +71,28 @@ export class SeasonJellyfinService {
       },
     });
     return true;
+  }
+
+  @Cron('*/5 * * * * *') // 每 5 秒
+  async syncAllSeasonsJellyfinSeriesId() {
+    const seasons = await this.prisma.season.findMany({
+      where: {
+        jellyfinId: '',
+        lastWriteToDisk: {
+          not: null,
+        },
+      },
+      include: { jellyfinFolder: true },
+    });
+    const result = await Promise.all(
+      seasons.map(async (season) => {
+        try {
+          return this.syncJellyfinSeriesId(season);
+        } catch (_error) {
+          return false;
+        }
+      }),
+    );
+    return result.filter((b) => b).length;
   }
 }

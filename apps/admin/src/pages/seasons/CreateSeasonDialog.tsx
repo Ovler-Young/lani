@@ -1,4 +1,7 @@
-import { CreateSeasonDocument } from '@/generated/types';
+import {
+  CreateSeasonDocument,
+  WriteSeasonMetadataDocument,
+} from '@/generated/types';
 import { useJellyfinFolders } from '@/pages/seasons/useJellyfinFolders';
 import { useAsyncButton } from '@/utils/useAsyncButton';
 import { createUseDialog, DialogProps } from '@/utils/useDialog';
@@ -41,6 +44,10 @@ export default function CreateSeasonDialog({
       if (!id) {
         throw new Error('no id');
       }
+      await client.mutate({
+        mutation: WriteSeasonMetadataDocument,
+        variables: { id },
+      });
       void message.success('新建成功');
       void resolve({ id });
     } catch (e) {

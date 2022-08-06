@@ -121,6 +121,7 @@ export default function AddFromBangumiDialog({
                         seasonId: id,
                       },
                     });
+                    // syncMetadata会写入元数据，这里不用手动触发写入
                     void message.success('同步元数据成功');
                     void resolve({ id });
                   } catch (e) {
