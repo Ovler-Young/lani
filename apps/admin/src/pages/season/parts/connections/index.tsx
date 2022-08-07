@@ -7,29 +7,15 @@ import {
   mikanAnimeLink,
   tvdbLinkById,
 } from '@/constants/link';
-import { GetJellyfinIdByIdDocument } from '@/generated/types';
 import { LinkOutlined } from '@ant-design/icons';
 import ProForm, { ProFormText } from '@ant-design/pro-form';
-import { useQuery } from '@apollo/client';
 import { Button, Form, Input, InputNumber, Space, Typography } from 'antd';
 import Section from '../../components/section';
 import { FormValues, useSeasonPageContext } from '../../help';
 import styles from './index.module.less';
 
-function useJellyfinId(id: number) {
-  const { data } = useQuery(GetJellyfinIdByIdDocument, {
-    variables: {
-      id,
-    },
-    pollInterval: 2000,
-  });
-  return data?.seasonById?.jellyfinId ?? '';
-}
-
 export default function Connections() {
-  const { id } = useSeasonPageContext();
-
-  const jellyfinId = useJellyfinId(id);
+  const { jellyfinId } = useSeasonPageContext();
 
   return (
     <Section title="关联设置" className={styles.root}>

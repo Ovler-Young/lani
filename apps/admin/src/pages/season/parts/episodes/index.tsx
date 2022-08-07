@@ -208,7 +208,7 @@ function useColumns({
 }
 
 export default function Episodes() {
-  const { episodes, formRef, syncEpisodes, reloadEpisodes } =
+  const { episodes, formRef, syncEpisodes, reloadEpisodes, episodesLastSync } =
     useSeasonPageContext();
 
   const [downloadMagnetDialog, , openDownloadMagnet] =
@@ -247,15 +247,11 @@ export default function Episodes() {
           key={1}
         >
           上次同步时间：
-          <FormDependency<FormValues> name={['episodesLastSync']}>
-            {({ episodesLastSync }) =>
-              episodesLastSync ? (
-                dayjs(episodesLastSync).format('YYYY-MM-DD HH:mm:ss')
-              ) : (
-                <Typography.Text type="secondary">未同步</Typography.Text>
-              )
-            }
-          </FormDependency>
+          {episodesLastSync ? (
+            dayjs(episodesLastSync).format('YYYY-MM-DD HH:mm:ss')
+          ) : (
+            <Typography.Text type="secondary">未同步</Typography.Text>
+          )}
         </div>,
         <Button type="primary" ghost {...syncEpisodeProps} key={0}>
           立即同步

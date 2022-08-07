@@ -4,6 +4,7 @@ fragment displayImageFields on Image {
 }
 
 fragment seasonEpisodes on Season {
+  episodesLastSync
   episodesBySeasonId(orderBy: INDEX_ASC) {
     edges {
       node {
@@ -22,7 +23,6 @@ fragment seasonConfigFields on Season {
   id
   infoSource
   isMonitoring
-  jellyfinId
   mikanAnimeId
   tags
   title
@@ -55,7 +55,6 @@ fragment seasonConfigFields on Season {
   fanart: imageByFanartImageId {
     ...displayImageFields
   }
-  episodesLastSync
   needDownloadCc
   jellyfinFolder: jellyfinFolderByJellyfinFolderId {
     name

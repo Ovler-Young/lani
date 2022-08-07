@@ -1,6 +1,7 @@
 import { calcEpisodeStatus, EpisodeStatus } from '@/constants/download-status';
 import {
   DisplayImageFieldsFragment,
+  GetJellyfinIdByIdDocument,
   GetSeasonByIdDocument,
   MetadataSource,
   SeasonConfigFieldsFragment,
@@ -13,7 +14,7 @@ import {
 } from '@/generated/types';
 import { ExtractNode, extractNode } from '@/utils/graphql';
 import { ProFormInstance } from '@ant-design/pro-form';
-import { useApolloClient } from '@apollo/client';
+import { useApolloClient, useQuery } from '@apollo/client';
 import { useMemoizedFn, useMount } from 'ahooks';
 import { FormItemProps, message } from 'antd';
 import {
@@ -47,7 +48,6 @@ type DownloadSource = ExtractNode<
 
 export interface FormValues {
   isMonitoring: boolean;
-  jellyfinId: string;
   mikanAnimeId: string;
   jellyfinFolderDesc: string;
   tags: string[];
@@ -68,7 +68,6 @@ export interface FormValues {
   poster: DisplayImageFieldsFragment | null;
   fanart: DisplayImageFieldsFragment | null;
   banner: DisplayImageFieldsFragment | null;
-  episodesLastSync: Date | null;
   needDownloadCc: boolean;
   notifyMissing: boolean;
   notifyPublish: boolean;
@@ -76,7 +75,6 @@ export interface FormValues {
 
 export function queryToFormValues({
   isMonitoring,
-  jellyfinId,
   mikanAnimeId,
   jellyfinFolder,
   tags,
@@ -96,14 +94,12 @@ export function queryToFormValues({
   poster,
   banner,
   fanart,
-  episodesLastSync,
   needDownloadCc,
   notifyMissing,
   notifyPublish,
 }: Season): FormValues {
   return {
     isMonitoring,
-    jellyfinId,
     mikanAnimeId,
     jellyfinFolderDesc: jellyfinFolder
       ? `${jellyfinFolder.name} (${jellyfinFolder.location})`
@@ -133,7 +129,6 @@ export function queryToFormValues({
     poster: poster ?? null,
     banner: banner ?? null,
     fanart: fanart ?? null,
-    episodesLastSync: episodesLastSync ?? null,
     needDownloadCc,
     notifyMissing,
     notifyPublish,
@@ -158,42 +153,36 @@ export const formItemProps: FormItemProps = {
 
 export type FormRef = MutableRefObject<ProFormInstance<FormValues> | undefined>;
 
-export interface SeasonPageContextValues {
-  id: number;
-  episodes: Episode[];
-  reloadConfig: () => Promise<void>;
-  reloadEpisodes: () => Promise<void>;
-  syncMetadataAndEpisodes: () => Promise<void>;
-  syncEpisodes: () => Promise<void>;
-  formRef: FormRef;
-  modified: boolean;
-  submit: (values: FormValues) => Promise<boolean>;
-  reset: () => void;
-}
+export type SeasonPageContextValues = ReturnType<
+  typeof useSeasonPage
+>['values'];
 
-export const SeasonPageContext = createContext<SeasonPageContextValues>({
-  id: 0,
-  episodes: [],
-  async reloadConfig() {},
-  async reloadEpisodes() {},
-  async syncMetadataAndEpisodes() {},
-  async syncEpisodes() {},
-  formRef: {
-    current: undefined,
-  },
-  modified: false,
-  async submit() {
-    return false;
-  },
-  reset() {},
-});
+export const SeasonPageContext = createContext<SeasonPageContextValues | null>(
+  null,
+);
 
 export function useSeasonPageContext() {
-  return useContext(SeasonPageContext);
+  const values = useContext(SeasonPageContext);
+  if (values === null) {
+    throw new Error(
+      'useSeasonPageContext() called outside of SeasonPageContext',
+    );
+  }
+  return values;
 }
 
 export function useSeasonId() {
   return useSeasonPageContext().id;
+}
+
+function useJellyfinId(id: number) {
+  const { data } = useQuery(GetJellyfinIdByIdDocument, {
+    variables: {
+      id,
+    },
+    pollInterval: 2000,
+  });
+  return data?.seasonById?.jellyfinId ?? '';
 }
 
 export function useSeasonPage(id: number) {
@@ -204,10 +193,12 @@ export function useSeasonPage(id: number) {
   const [initialValues, setInitialValues] = useState<FormValues | undefined>(
     undefined,
   );
+  const [episodesLastSync, setEpisodesLastSync] = useState<Date | null>(null);
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [loading, setLoading] = useState(false);
 
   const [touched, setTouched] = useState(false);
+  const jellyfinId = useJellyfinId(id);
 
   const updateTouched = useMemoizedFn(() => {
     if (formRef.current) {
@@ -232,6 +223,7 @@ export function useSeasonPage(id: number) {
         reset();
       }
       if ('episodesBySeasonId' in values) {
+        setEpisodesLastSync(values.episodesLastSync ?? null);
         setEpisodes(
           (extractNode(values.episodesBySeasonId) ?? []).map(mapEpisode),
         );
@@ -419,7 +411,7 @@ export function useSeasonPage(id: number) {
     },
   );
 
-  const values: SeasonPageContextValues = useMemo(
+  const values = useMemo(
     () => ({
       id,
       episodes,
@@ -431,6 +423,8 @@ export function useSeasonPage(id: number) {
       reset,
       formRef,
       modified: touched,
+      jellyfinId,
+      episodesLastSync,
     }),
     [
       id,
@@ -442,6 +436,8 @@ export function useSeasonPage(id: number) {
       touched,
       submit,
       reset,
+      jellyfinId,
+      episodesLastSync,
     ],
   );
 
