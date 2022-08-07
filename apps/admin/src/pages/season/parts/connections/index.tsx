@@ -1,4 +1,3 @@
-import AsyncButton from '@/components/AsyncButton';
 import FormDependency from '@/components/FormDependency';
 import { IconPath } from '@/constants/icon-path';
 import {
@@ -8,43 +7,79 @@ import {
   mikanAnimeLink,
   tvdbLinkById,
 } from '@/constants/link';
-import { SyncJellyfinSeriesIdDocument } from '@/generated/types';
-import { FormValues, useSeasonPageContext } from '@/pages/season/help';
-import Section from '@/pages/season/Section';
-import { LinkOutlined, SearchOutlined } from '@ant-design/icons';
+import { GetJellyfinIdByIdDocument } from '@/generated/types';
+import { LinkOutlined } from '@ant-design/icons';
 import ProForm, { ProFormText } from '@ant-design/pro-form';
-import { useApolloClient } from '@apollo/client';
-import {
-  Alert,
-  Button,
-  Form,
-  Input,
-  InputNumber,
-  message,
-  Space,
-  Typography,
-} from 'antd';
-import styles from './Connections.module.less';
+import { useQuery } from '@apollo/client';
+import { Button, Form, Input, InputNumber, Space, Typography } from 'antd';
+import Section from '../../components/section';
+import { FormValues, useSeasonPageContext } from '../../help';
+import styles from './index.module.less';
+
+function useJellyfinId(id: number) {
+  const { data } = useQuery(GetJellyfinIdByIdDocument, {
+    variables: {
+      id,
+    },
+    pollInterval: 2000,
+  });
+  return data?.seasonById?.jellyfinId ?? '';
+}
 
 export default function Connections() {
-  const { id, reloadConfig } = useSeasonPageContext();
-  const client = useApolloClient();
+  const { id } = useSeasonPageContext();
+
+  const jellyfinId = useJellyfinId(id);
+
   return (
     <Section title="关联设置" className={styles.root}>
-      <FormDependency<FormValues> name={['jellyfinId']}>
-        {({ jellyfinId }) =>
-          !jellyfinId ? (
-            <Alert
-              message="Jellyfin季度ID未设置，下载流程中无法获取Jellyfin剧集ID，无法进行推送"
-              type="warning"
-              showIcon
-              style={{
-                marginBottom: 16,
-              }}
-            />
-          ) : null
+      <Form.Item
+        label={
+          <Space>
+            <img src={IconPath.jellyfinIcon} className={styles.icon} />
+            <Typography.Text>Jellyfin</Typography.Text>
+          </Space>
         }
-      </FormDependency>
+      >
+        <Input.Group
+          compact
+          style={{
+            whiteSpace: 'nowrap',
+            flexWrap: 'nowrap',
+          }}
+        >
+          <ProFormText
+            disabled
+            name="jellyfinFolderDesc"
+            formItemProps={{
+              noStyle: true,
+            }}
+            width={160}
+            placeholder="媒体库"
+            fieldProps={{
+              className: styles.jellyfinFolder,
+            }}
+          />
+          <Input
+            disabled
+            placeholder="自动获取中"
+            addonBefore="中的"
+            style={{
+              width: 360,
+            }}
+            className={styles.jellyfinInput}
+            value={jellyfinId}
+          />
+          <Button
+            icon={<LinkOutlined />}
+            disabled={!jellyfinId}
+            href={jellyfinSeasonLink(jellyfinId)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.button}
+          />
+        </Input.Group>
+      </Form.Item>
       <ProForm.Group>
         <Form.Item
           label={
@@ -186,80 +221,6 @@ export default function Connections() {
                   href={mikanAnimeLink(mikanAnimeId)}
                   target="_blank"
                   rel="noopener noreferrer"
-                />
-              )}
-            </FormDependency>
-          </Input.Group>
-        </Form.Item>
-        <Form.Item
-          label={
-            <Space>
-              <img src={IconPath.jellyfinIcon} className={styles.icon} />
-              <Typography.Text>Jellyfin</Typography.Text>
-            </Space>
-          }
-        >
-          <Input.Group
-            compact
-            style={{
-              whiteSpace: 'nowrap',
-              flexWrap: 'nowrap',
-            }}
-          >
-            <ProFormText
-              disabled={true}
-              name="jellyfinFolderDesc"
-              formItemProps={{
-                noStyle: true,
-              }}
-              width={160}
-              placeholder="媒体库"
-              fieldProps={{
-                className: styles.jellyfinFolder,
-              }}
-            />
-            <Form.Item name="jellyfinId" noStyle>
-              <Input
-                placeholder="32位季度ID"
-                addonBefore="中的"
-                style={{
-                  width: 360,
-                }}
-                className={styles.jellyfinInput}
-              />
-            </Form.Item>
-            <AsyncButton
-              icon={<SearchOutlined />}
-              onClick={async () => {
-                try {
-                  const { data } = await client.mutate({
-                    mutation: SyncJellyfinSeriesIdDocument,
-                    variables: {
-                      seasonId: id,
-                    },
-                  });
-                  if (!data?.syncJellyfinSeriesId) {
-                    void message.error('获取Jellyfin季度ID失败');
-                    return;
-                  }
-                  void message.success('获取Jellyfin季度ID成功');
-                  void reloadConfig();
-                } catch (error) {
-                  console.error(error);
-                  void message.error('获取Jellyfin季度ID失败');
-                }
-              }}
-              className={styles.button}
-            />
-            <FormDependency<FormValues> name={['jellyfinId']}>
-              {({ jellyfinId }) => (
-                <Button
-                  icon={<LinkOutlined />}
-                  disabled={!jellyfinId}
-                  href={jellyfinSeasonLink(jellyfinId)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={styles.button}
                 />
               )}
             </FormDependency>

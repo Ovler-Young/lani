@@ -36,7 +36,6 @@ fragment seasonConfigFields on Season {
   bilibiliThmId
   createdAt
   description
-  isArchived
   episodesSource
   downloadSourcesBySeasonId {
     edges {
@@ -75,25 +74,6 @@ query GetSeasonById(
   seasonById(id: $id) {
     ...seasonConfigFields @include(if: $withConfig)
     ...seasonEpisodes @include(if: $withEpisodes)
-  }
-}
-
-query GetSeasonByIdAll($id: Int!) {
-  seasonById(id: $id) {
-    ...seasonConfigFields
-    ...seasonEpisodes
-  }
-}
-
-query GetSeasonByIdConfigOnly($id: Int!) {
-  seasonById(id: $id) {
-    ...seasonConfigFields
-  }
-}
-
-query GetSeasonByIdEpisodesOnly($id: Int!) {
-  seasonById(id: $id) {
-    ...seasonEpisodes
   }
 }
 
@@ -151,4 +131,10 @@ mutation SyncJellyfinSeriesId($seasonId: Int!) {
 
 mutation DownloadBilibiliCC($episodeId: Int!) {
   downloadBilibiliCC(episodeId: $episodeId)
+}
+
+query GetJellyfinIdById($id: Int!) {
+  seasonById(id: $id) {
+    jellyfinId
+  }
 }
