@@ -5,6 +5,6 @@ import { SentryService } from '@ntegral/nestjs-sentry';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useLogger(SentryService.SentryServiceInstance());
-  await app.listen(3000);
+  await app.listen(parseInt(process.env.PORT || '3000'));
 }
 bootstrap();

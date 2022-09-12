@@ -46,4 +46,45 @@ export class MikanSyncService {
       throw error;
     }
   }
+
+  async syncMikanHistory() {
+    console.debug('Syncing mikan history...');
+    try {
+      const items: Awaited<
+        ReturnType<FetchMikanService['fetchMikanRSSItems']>
+      > = [];
+      // 1~10 页右缓存，不影响服务性能
+      for (let i = 0; i < 10; ++i) {
+        items.push(
+          ...(await this.fetchMikanService.fetchMikanRSSItems(`Classic/${i}`)),
+        );
+      }
+      const { count } = await this.prisma.torrent.createMany({
+        data: items.map(
+          ({
+            hash,
+            publishDate,
+            size,
+            title,
+            torrentLink,
+          }): Prisma.TorrentCreateManyInput => {
+            return {
+              title,
+              torrentLink,
+              size,
+              publishDate,
+              hash,
+              ...this.parseTorrentService.titleToCreateInput(title),
+            };
+          },
+        ),
+        skipDuplicates: true,
+      });
+      console.log(items.length, 'items found', count, 'items new');
+      return count;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
 }
