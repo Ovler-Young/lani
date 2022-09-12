@@ -1,7 +1,9 @@
+import AsyncButton from '@/components/AsyncButton';
 import { TableTitle } from '@/components/Layout';
 import {
   BigIntFilter,
   ListTorrentsDocument,
+  SyncMikanHistoryDocument,
   TorrentFieldsFragment,
   TorrentFilter,
   TorrentParseFieldsFragment,
@@ -16,10 +18,10 @@ import {
   withAntdSearch,
 } from '@/utils/search';
 import useMobile from '@/utils/useMobile';
-import { QuestionCircleOutlined } from '@ant-design/icons';
+import { HistoryOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import ProTable, { ActionType } from '@ant-design/pro-table';
 import { ApolloClient, useApolloClient } from '@apollo/client';
-import { Space, Tag, TagProps, Tooltip, Typography } from 'antd';
+import { message, Space, Tag, TagProps, Tooltip, Typography } from 'antd';
 import { hsluvToHex } from 'hsluv';
 import md5 from 'md5';
 import prettyBytes from 'pretty-bytes';
@@ -432,6 +434,35 @@ export default withAntdSearch(function Torrents() {
         defaultSize="middle"
         headerTitle={<TableTitle>种子列表</TableTitle>}
         actionRef={ref}
+        toolBarRender={() => [
+          <Tooltip
+            key={0}
+            title="同步失败超过 1 天时，获取历史数据补充缺失的种子"
+          >
+            <AsyncButton
+              type="primary"
+              onClick={async () => {
+                const hide = message.loading('同步中，请稍候……', 0);
+                try {
+                  const { data } = await client.mutate({
+                    mutation: SyncMikanHistoryDocument,
+                  });
+                  const count = data?.syncMikanHistory ?? 0;
+                  void message.success(`同步成功，新增 ${count} 条种子`);
+                  void ref.current?.reload();
+                } catch (error) {
+                  console.error(error);
+                  void message.error('同步失败');
+                } finally {
+                  hide();
+                }
+              }}
+              icon={<HistoryOutlined />}
+            >
+              同步历史种子
+            </AsyncButton>
+          </Tooltip>,
+        ]}
         search={false}
         className={styles.root}
         scroll={{
