@@ -50,7 +50,7 @@ jobs:
           image_digest=$(docker inspect $latest_image | jq -r '.[0].RepoDigests[0]')
           echo "::set-output name=image_digest::$image_digest"
         env:
-          latest_image: ghcr.io/${{ github.repository_owner }}/${{ steps.app_name.outputs.app_name }}:latest
+          latest_image: ghcr.io/${{ github.repository_owner }}/lani-${{ steps.app_name.outputs.app_name }}:latest
 
       # generate manifest
 
