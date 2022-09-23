@@ -153,11 +153,13 @@ export default class Devops extends Command {
       inputs.environment = env;
     }
 
+    const workflow = config.ci.workflow ?? "default_pipeline.yaml";
+
     const createTime = new Date().getTime();
     await octokit.rest.actions.createWorkflowDispatch({
       owner: "std4453",
       repo: "lani",
-      workflow_id: "pipeline.yaml",
+      workflow_id: workflow,
       ref: "master",
       inputs,
     });
@@ -172,7 +174,7 @@ export default class Devops extends Command {
       } = await octokit.rest.actions.listWorkflowRuns({
         owner: "std4453",
         repo: "lani",
-        workflow_id: "pipeline.yaml",
+        workflow_id: workflow,
         event: "workflow_dispatch",
       });
 

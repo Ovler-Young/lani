@@ -1,4 +1,4 @@
-name: "Default Node.js CI"
+name: "Generic App Build"
 
 on:
   workflow_dispatch:
@@ -22,10 +22,6 @@ on:
         type: string
         description: "Project package name"
         required: true
-    outputs:
-      image_ref:
-        description: "Image ref"
-        value: ${{ jobs.build.outputs.image_ref_run_number }}
 
 jobs:
   build:
@@ -135,9 +131,3 @@ jobs:
             ${{ steps.tag_names.outputs.image_ref_sha }},
             ${{ steps.tag_names.outputs.image_ref_branch }},
             ${{ steps.tag_names.outputs.image_ref_latest }}
-
-    outputs:
-      image_ref_run_number: ${{ steps.tag_names.outputs.image_ref_run_number }}
-      image_ref_sha: ${{ steps.tag_names.outputs.image_ref_sha }}
-      image_ref_branch: ${{ steps.tag_names.outputs.image_ref_branch }}
-      image_ref_latest: ${{ steps.tag_names.outputs.image_ref_latest }}
