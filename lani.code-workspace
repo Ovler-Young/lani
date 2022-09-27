@@ -21,12 +21,12 @@
       "path": "tools/cli"
     },
     {
-      "name": "🚀 @lani/admin",
-      "path": "apps/admin"
-    },
-    {
       "name": "🚀 @lani/data-server",
       "path": "apps/data-server"
+    },
+    {
+      "name": "🚀 @lani/admin",
+      "path": "apps/admin"
     },
     {
       "name": "🚀 @lani/api-server",
@@ -35,6 +35,10 @@
     {
       "name": "🚀 @lani/gateway",
       "path": "apps/gateway"
+    },
+    {
+      "name": "🚚 @lani/all-in-one",
+      "path": "apps/all-in-one"
     }
   ],
 	"settings": {

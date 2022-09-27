@@ -1,0 +1,23 @@
+{
+  "name": "@lani/all-in-one",
+  "version": "1.0.0",
+  "private": "true",
+  "scripts": {
+    "build": "true",
+    "devops": "lani-cli devops",
+    "manifest": "lani-cli manifest"
+  },
+  "devDependencies": {
+    "@lani/cli": "~1.0.0",
+    "@lani/admin": "~1.0.0",
+    "@lani/api-server": "~1.0.0",
+    "@lani/data-server": "~1.0.0",
+    "@lani/gateway": "~1.0.0"
+  },
+  "dependencies": {},
+  "files": [
+    "/nginx.conf",
+    "/start.sh",
+    "/ecosystem.config.js"
+  ]
+}
