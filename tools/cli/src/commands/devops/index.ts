@@ -160,7 +160,7 @@ export default class Devops extends Command {
       owner: "std4453",
       repo: "lani",
       workflow_id: workflow,
-      ref: "master",
+      ref,
       inputs,
     });
 
