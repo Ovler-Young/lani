@@ -8,13 +8,19 @@ import { env, getPort } from "@lani/framework";
 import Koa from "koa";
 import { postgraphile, PostGraphileOptions } from "postgraphile";
 import ConnectionFilterPlugin from "postgraphile-plugin-connection-filter";
+import PgOrderByRelatedPlugin from "@graphile-contrib/pg-order-by-related";
 
 const options: PostGraphileOptions = {
   subscriptions: true,
   dynamicJson: true,
   enableQueryBatching: true,
   legacyRelations: "omit",
-  appendPlugins: [OmitArchivedPlugin, ConnectionFilterPlugin, FederationPlugin],
+  appendPlugins: [
+    OmitArchivedPlugin,
+    ConnectionFilterPlugin,
+    FederationPlugin,
+    PgOrderByRelatedPlugin,
+  ],
   graphileBuildOptions: {
     connectionFilterRelations: true,
   },

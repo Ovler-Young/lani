@@ -92,6 +92,7 @@ specifiers:
   graphile-build: ~4.12.2
   graphql: 15.8.0
   handlebars: ~4.7.7
+  hsluv: ~0.1.0
   https-proxy-agent: ~5.0.0
   inclusion: ~1.0.1
   inquirer: ~8.2.2
@@ -233,6 +234,7 @@ dependencies:
   graphile-build: 4.12.2_graphql@15.8.0
   graphql: 15.8.0
   handlebars: 4.7.7
+  hsluv: 0.1.0
   https-proxy-agent: 5.0.0
   inclusion: 1.0.1
   inquirer: 8.2.2
@@ -2852,6 +2854,11 @@ packages:
       - graphile-build
       - graphile-build-pg
       - supports-color
+    dev: false
+
+  /@graphile-contrib/pg-order-by-related/1.0.0-beta.6:
+    resolution: {integrity: sha512-NDEDhkjpEmLzVMYsv9LqTNyaMXlL32yiFFk7Lj7WAloe1Dgn9/1zMQILMRC+Q9WmFE/edHtXjBRHrXs9NYr3GA==}
+    engines: {node: '>=8.6'}
     dev: false
 
   /@graphile-contrib/pg-simplify-inflector/6.1.0:
@@ -21712,12 +21719,13 @@ packages:
     dev: false
 
   file:projects/data-server.tgz_@types+node@17.0.23:
-    resolution: {integrity: sha512-N2Uy9MxpH7dN30nnpE4Ti/+3bJlXQhQgP/a4xyqmJCJ20lV23HFWTYVa8CuNjGfvdRdFoytE5DZ09fIIF4rI/Q==, tarball: file:projects/data-server.tgz}
+    resolution: {integrity: sha512-CQTvwtRQrj+CA7FGxl7d9lacA4AWRHr4NQBxWbeNAhcT+ImBqyv8+N9S8LanEJKtqDZ32tOsGq8L0WA7zs6ovA==, tarball: file:projects/data-server.tgz}
     id: file:projects/data-server.tgz
     name: '@rush-temp/data-server'
     version: 0.0.0
     dependencies:
       '@graphile-contrib/pg-omit-archived': 2.1.0_250e71098788239b4a4dfe2a50d4f5b5
+      '@graphile-contrib/pg-order-by-related': 1.0.0-beta.6
       '@graphile-contrib/pg-simplify-inflector': 6.1.0
       '@graphile/federation': 0.1.0_6130c89331ecac3323ebe7f3a64be2b5
       '@types/koa': 2.13.4
