@@ -23,6 +23,7 @@ const options: PostGraphileOptions = {
   ],
   graphileBuildOptions: {
     connectionFilterRelations: true,
+    orderByRelatedColumnAggregates: true,
   },
   ...confPostgraphileOptions,
   // 开发模式启用 graphiql
