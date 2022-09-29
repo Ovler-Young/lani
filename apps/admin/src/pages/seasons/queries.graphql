@@ -28,6 +28,24 @@ fragment listSeasonsFields on Season {
   ) {
     totalCount
   }
+  firstEpisode: episodesBySeasonId(first: 1, orderBy: INDEX_ASC) {
+    edges {
+      node {
+        airTime
+      }
+    }
+  }
+  nextEpisode: episodesBySeasonId(
+    first: 1
+    orderBy: INDEX_ASC
+    filter: { airTime: { greaterThanOrEqualTo: $now } }
+  ) {
+    edges {
+      node {
+        airTime
+      }
+    }
+  }
   latestEpisode: episodesBySeasonId(
     first: 1
     orderBy: INDEX_DESC
