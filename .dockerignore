@@ -1,0 +1,2 @@
+# exclude local node_modules to minimize docker build context size
+/common/temp

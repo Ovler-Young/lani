@@ -7,7 +7,10 @@
   "scripts": {
     "build": "prisma generate",
     "prisma:pull": "prisma db pull",
-    "prisma:push": "prisma db push"
+    "prisma:push": "prisma db push",
+    "migrate:create": "prisma migrate dev --create-only",
+    "migrate:apply": "prisma migrate dev --skip-generate",
+    "migrate:deploy": "prisma migrate deploy"
   },
   "devDependencies": {
     "typescript": "~4.5.4",
@@ -16,10 +19,11 @@
     "typescript-transform-paths": "~3.3.1"
   },
   "dependencies": {
-    "prisma": "~3.11.0",
-    "@prisma/client": "~3.11.0"
+    "prisma": "~3.15.0",
+    "@prisma/client": "~3.15.0"
   },
   "files": [
-    "/dist"
+    "/dist",
+    "/prisma"
   ]
 }

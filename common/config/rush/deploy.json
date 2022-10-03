@@ -22,7 +22,8 @@
     "@lani/api-server",
     "@lani/gateway",
     "@lani/admin",
-    "@lani/all-in-one"
+    "@lani/all-in-one",
+    "@lani/db"
   ],
 
   /**
@@ -122,7 +123,7 @@
        * The full package name of the project, which must be declared in rush.json.
        */
       "projectName": "@lani/all-in-one",
-    
+
       /**
        * A list of additional local Rush projects to be deployed with this project (beyond the package.json
        * dependencies).  Specify full package names, which must be declared in rush.json.
@@ -131,7 +132,8 @@
         "@lani/data-server",
         "@lani/api-server",
         "@lani/gateway",
-        "@lani/admin"
+        "@lani/admin",
+        "@lani/db"
       ]
     }
   ]

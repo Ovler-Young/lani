@@ -12,9 +12,12 @@
     "@lani/admin": "~1.0.0",
     "@lani/api-server": "~1.0.0",
     "@lani/data-server": "~1.0.0",
-    "@lani/gateway": "~1.0.0"
+    "@lani/gateway": "~1.0.0",
+    "@lani/db": "~1.0.0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "dotenv": "~16.0.3"
+  },
   "files": [
     "/nginx.conf",
     "/start.sh",
