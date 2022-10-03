@@ -52,10 +52,6 @@
           "description": "Github workflow name",
           "type": "string"
         },
-        "image": {
-          "description": "Build image name",
-          "type": "string"
-        },
         "deployment": {
           "description": "Deployment-related settings",
           "type": "object",
@@ -73,8 +69,7 @@
           "required": ["env"]
         }
       },
-      "additionalProperties": false,
-      "required": ["image"]
+      "additionalProperties": false
     }
   },
   "additionalProperties": false,

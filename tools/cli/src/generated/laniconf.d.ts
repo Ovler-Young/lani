@@ -49,10 +49,6 @@ export interface LaniConfig {
      */
     workflow?: string;
     /**
-     * Build image name
-     */
-    image: string;
-    /**
      * Deployment-related settings
      */
     deployment?: {

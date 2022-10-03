@@ -2,13 +2,13 @@ import { CollectionTypeOptions, LibraryStructureService } from '@/api/jellyfin';
 import { PrismaService } from '@/common/prisma.service';
 import config from '@/config';
 import { mapPath } from '@/utils/path';
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ID, Mutation, Resolver } from '@nestjs/graphql';
 import path from 'path';
 
 @Injectable()
 @Resolver()
-export class JellyfinSyncService {
+export class JellyfinSyncService implements OnModuleInit {
   constructor(private prisma: PrismaService) {}
 
   private getMappedFolderLocation(location: string) {
@@ -68,5 +68,9 @@ export class JellyfinSyncService {
       }),
     ]);
     return 'ok';
+  }
+
+  async onModuleInit() {
+    await this.syncJellyfinFolders();
   }
 }

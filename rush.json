@@ -483,6 +483,10 @@
     {
       "packageName": "@lani/parse-torrent-title",
       "projectFolder": "libs/parse-torrent-title"
+    },
+    {
+      "packageName": "@lani/all-in-one",
+      "projectFolder": "apps/all-in-one"
     }
   ]
 }

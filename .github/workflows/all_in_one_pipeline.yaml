@@ -1,4 +1,4 @@
-name: "Default Pipeline"
+name: "@lani/all-in-one Pipeline"
 
 on:
   workflow_dispatch:
