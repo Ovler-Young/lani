@@ -10,30 +10,17 @@ type WithEnabled<T> =
       enabled: true;
     } & T);
 
-interface GroupAuthorization {
-  type: "group";
-  group: string;
+interface AuthorizationConfig {
+  query: string;
+  result: any;
 }
 
-interface RoleAuthorization {
-  type: "role";
-  role: string;
-}
-
-interface AudienceAuthorization {
-  type: "audience";
-  audience: string;
-}
-
-type AuthorizationConfig =
-  | GroupAuthorization
-  | RoleAuthorization
-  | AudienceAuthorization;
-
-type AuthConfig = {
-  issuer: string;
+interface AuthConfig {
+  authority: string;
   clientId: string;
-} & AuthorizationConfig;
+  authz?: WithEnabled<AuthorizationConfig>;
+  clientConfig?: Record<string, any>;
+}
 
 export interface ConfigType {
   subgraphs: ServiceEndpointDefinition[];
@@ -59,24 +46,19 @@ export default loadConfigSync<ConfigType>({
         }),
         Joi.object({
           enabled: Joi.boolean().truthy().required(),
-          issuer: Joi.string().required(),
+          authority: Joi.string().required(),
           clientId: Joi.string().required(),
-          type: Joi.string().valid("group").required(),
-          group: Joi.string().required(),
-        }),
-        Joi.object({
-          enabled: Joi.boolean().truthy().required(),
-          issuer: Joi.string().required(),
-          clientId: Joi.string().required(),
-          type: Joi.string().valid("role").required(),
-          role: Joi.string().required(),
-        }),
-        Joi.object({
-          enabled: Joi.boolean().truthy().required(),
-          issuer: Joi.string().required(),
-          clientId: Joi.string().required(),
-          type: Joi.string().valid("audience").required(),
-          audience: Joi.string().required(),
+          authz: Joi.alternatives().try(
+            Joi.object({
+              enabled: Joi.boolean().falsy().required(),
+            }),
+            Joi.object({
+              enabled: Joi.boolean().truthy().required(),
+              query: Joi.string().required(),
+              result: Joi.any().required(),
+            })
+          ),
+          clientConfig: Joi.object(),
         })
       )
       .required(),

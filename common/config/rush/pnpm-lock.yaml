@@ -62,6 +62,7 @@ specifiers:
   '@types/history': 2.0.45
   '@types/inquirer': ~8.2.1
   '@types/jest': 27.4.1
+  '@types/jmespath': ~0.15.0
   '@types/js-yaml': ~4.0.5
   '@types/koa': ~2.13.4
   '@types/lodash': ~4.14.178
@@ -80,7 +81,6 @@ specifiers:
   '@umijs/route-utils': ~2.0.4
   ahooks: ~3.1.9
   antd: ~4.19.4
-  apollo-server: ~3.6.4
   apollo-server-core: ~3.10.2
   apollo-server-express: ~3.10.2
   aws-sdk: ~2.1152.0
@@ -109,6 +109,7 @@ specifiers:
   inclusion: ~1.0.1
   inquirer: ~8.2.2
   jest: ^27.2.5
+  jmespath: ~0.16.0
   joi: ~17.6.0
   jose: ~4.6.0
   js-yaml: ~4.1.0
@@ -217,6 +218,7 @@ dependencies:
   '@types/history': 2.0.45
   '@types/inquirer': 8.2.1
   '@types/jest': 27.4.1
+  '@types/jmespath': 0.15.0
   '@types/js-yaml': 4.0.5
   '@types/koa': 2.13.4
   '@types/lodash': 4.14.181
@@ -235,7 +237,6 @@ dependencies:
   '@umijs/route-utils': 2.0.5
   ahooks: 3.1.14_react@17.0.2
   antd: 4.19.5_react-dom@17.0.2+react@17.0.2
-  apollo-server: 3.6.7_graphql@15.8.0
   apollo-server-core: 3.10.2_graphql@15.8.0
   apollo-server-express: 3.10.2_express@4.18.1+graphql@15.8.0
   aws-sdk: 2.1152.0
@@ -264,6 +265,7 @@ dependencies:
   inclusion: 1.0.1
   inquirer: 8.2.2
   jest: 27.5.1_ts-node@10.7.0
+  jmespath: 0.16.0
   joi: 17.6.0
   jose: 4.6.0
   js-yaml: 4.1.0
@@ -7565,6 +7567,10 @@ packages:
     dependencies:
       jest-matcher-utils: 27.5.1
       pretty-format: 27.5.1
+    dev: false
+
+  /@types/jmespath/0.15.0:
+    resolution: {integrity: sha512-uaht4XcYSq5ZrPriQW8C+g5DhptewRd1E84ph7L167sCyzLObz+U3JTpmYq/CNkvjNsz2mtyQoHPNEYQYTzWmg==}
     dev: false
 
   /@types/js-cookie/2.2.7:
@@ -26478,7 +26484,7 @@ packages:
     dev: false
 
   file:projects/admin.tgz_fa4f32d9ea471631dcdec03aa58c7a9a:
-    resolution: {integrity: sha512-Cqf8qT8+BbJaxepyhHVQexz3ixTdKO8ZBzxCwLMVL8lpaGpLwSXewEmP08j1lDtu2wT6BeEC1xtQL9hYqfshAg==, tarball: file:projects/admin.tgz}
+    resolution: {integrity: sha512-GWH9l5qaNWgUaRpOUfCQEfcBrAfn3ySMXYnKWb/lyLHY+7lEyU9clJcwfNMQh//XEqKwm9MT9aeDz1JKgfDTiQ==, tarball: file:projects/admin.tgz}
     id: file:projects/admin.tgz
     name: '@rush-temp/admin'
     version: 0.0.0
@@ -26501,6 +26507,7 @@ packages:
       '@rushstack/eslint-config': 2.5.2_eslint@7.32.0+typescript@4.5.5
       '@sentry/react': 6.17.9_react@17.0.2
       '@types/history': 2.0.45
+      '@types/jmespath': 0.15.0
       '@types/lodash': 4.14.181
       '@types/md5': 2.3.2
       '@types/qs': 6.9.7
@@ -26518,6 +26525,7 @@ packages:
       eslint: 7.32.0
       eslint-plugin-react-hooks: 4.3.0_eslint@7.32.0
       hsluv: 0.1.0
+      jmespath: 0.16.0
       keycloak-js: 15.0.2
       lodash: 4.17.21
       md5: 2.3.0
@@ -26809,12 +26817,13 @@ packages:
     dev: false
 
   file:projects/gateway.tgz:
-    resolution: {integrity: sha512-dROptsFRsl3edcz7l+n600Vl1pKcX0MHQaAvQJorcaj1lXv5w5AP9trR8r4Ru/vBMgL9q+6QbZC2Lpv1oEWsGg==, tarball: file:projects/gateway.tgz}
+    resolution: {integrity: sha512-yrGlJs674wgu/oxc6ipckFJZPqFFzt31Hx313UOphlEvyOrM4M5it4wxWQfVEDOFPuDxUyxAg9Lpid0ZkiHndw==, tarball: file:projects/gateway.tgz}
     name: '@rush-temp/gateway'
     version: 0.0.0
     dependencies:
       '@apollo/gateway': 0.46.0_graphql@15.8.0
       '@types/express': 4.17.13
+      '@types/jmespath': 0.15.0
       '@types/jsonwebtoken': 8.5.8
       apollo-server: 3.6.7_graphql@15.8.0
       apollo-server-core: 3.10.2_graphql@15.8.0
@@ -26822,6 +26831,7 @@ packages:
       axios: 0.26.1
       express: 4.18.1
       graphql: 15.8.0
+      jmespath: 0.16.0
       joi: 17.6.0
       jose: 4.6.0
       jsonwebtoken: 8.5.1

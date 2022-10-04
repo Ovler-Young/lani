@@ -1,6 +1,7 @@
 import { AppDispatch, AppGetState, RootState } from '@/store';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { UserManager, UserManagerSettings, UserProfile } from 'oidc-client-ts';
+import { parse, stringify } from 'qs';
 
 type WithEnabled<T> =
   | {
@@ -10,16 +11,8 @@ type WithEnabled<T> =
       enabled: true;
     } & T);
 
-interface GroupAuthorization {
-  type: 'group';
-  group: string;
-}
-
-type AuthorizationConfig = GroupAuthorization;
-
 interface AuthConfig {
-  config: Omit<UserManagerSettings, 'redirect_uri' | 'response_mode'>;
-  authorization?: WithEnabled<AuthorizationConfig>;
+  config: Omit<UserManagerSettings, 'redirect_uri'>;
 }
 
 type AuthConfigConditional = WithEnabled<AuthConfig>;
@@ -65,15 +58,14 @@ export const authSlice = createSlice({
     loginSuccess: (
       state,
       {
-        payload: { authorized, profile, token },
+        payload: { profile, token },
       }: PayloadAction<{
         profile: UserProfile;
-        authorized: boolean;
         token: string | undefined;
       }>,
     ) => {
       state.profile = profile;
-      state.authorized = authorized;
+      state.authorized = true;
       state.authenticated = true;
       state.token = token;
       state.loading = false;
@@ -86,11 +78,23 @@ export const authSlice = createSlice({
       state.authenticated = true;
       state.authorized = true;
     },
+
+    setAuthorized: (
+      state,
+      {
+        payload: { authorized },
+      }: PayloadAction<{
+        authorized: boolean;
+      }>,
+    ) => {
+      state.authorized = authorized;
+    },
   },
 });
 
 const { setUserManager, setConfig, loginSkipped, loginError, loginSuccess } =
   authSlice.actions;
+export const { setAuthorized } = authSlice.actions;
 
 export async function logout(_dispatch: AppDispatch, getState: AppGetState) {
   const manager = getState().auth.userManager;
@@ -111,8 +115,8 @@ export async function toAccountPage(
 
 // https://github.com/authts/react-oidc-context/blob/4a2a457371b9829bc2c02bdb5f916f068335e562/src/utils.ts
 function hasAuthParams(location = window.location) {
-  // response_mode: fragment
-  const searchParams = new URLSearchParams(location.hash.replace('#', '?'));
+  // response_mode: query
+  const searchParams = new URLSearchParams(location.search);
   if (
     (searchParams.get('code') || searchParams.get('error')) &&
     searchParams.get('state')
@@ -120,18 +124,6 @@ function hasAuthParams(location = window.location) {
     return true;
   }
 
-  return false;
-}
-
-function checkAuthorization(config: AuthConfig, profile: UserProfile) {
-  if (!config.authorization?.enabled) {
-    return true;
-  }
-  if (config.authorization.type === 'group') {
-    return ((profile.groups ?? []) as string[]).includes(
-      config.authorization.group,
-    );
-  }
   return false;
 }
 
@@ -152,10 +144,19 @@ export async function login(dispatch: AppDispatch) {
       return;
     }
 
+    const redirectURL = new URL('/redirect', window.location.href);
+    redirectURL.search = `?${stringify({
+      url: `${window.location.pathname}${window.location.search}${window.location.hash}`,
+    })}`;
+
     const manager = new UserManager({
+      // 这里让用户重写 scope，因为在请求 oidc-configuration 之前不知道有哪些可用的 scope，如果填错
+      // 会报错，用户自己应该知道有什么 scope 可用，默认只会获取 openid，没有用户名和头像这些，比较完整的是
+      // scope: openid profile name nickname email picture,
       ...authConfig.config,
-      redirect_uri: window.location.href,
-      response_mode: 'fragment',
+      redirect_uri: redirectURL.href,
+      loadUserInfo: true,
+      // response_type: query
     });
     dispatch(setUserManager({ userManager: manager }));
 
@@ -164,11 +165,12 @@ export async function login(dispatch: AppDispatch) {
     // 用户完成登录后会将本次用的 state 从 storage 中删除，如果此时（不可避免地）
     // 通过返回再次跳转到包含 state 的地址则会报错，因此这里判断如果已经完成登录，则
     // 不再调用 signinCallback
-    if (!user && hasAuthParams()) {
+    if (!user && window.location.pathname === '/redirect' && hasAuthParams()) {
       await manager.signinCallback();
-      const url = new URL(window.location.href);
-      url.hash = '';
-      window.location.replace(url.href);
+      const { url } = parse(window.location.search, {
+        ignoreQueryPrefix: true,
+      });
+      window.location.replace(url as string);
     }
 
     if (!user) {
@@ -180,7 +182,6 @@ export async function login(dispatch: AppDispatch) {
     } else {
       dispatch(
         loginSuccess({
-          authorized: checkAuthorization(authConfig, user.profile),
           profile: user.profile,
           token: user.access_token,
         }),

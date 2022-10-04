@@ -1,5 +1,7 @@
-import { AdminConfig } from '@/generated/types';
-import { RootState } from '@/store';
+import { client } from '@/client';
+import { AdminConfig, GetConfigDocument } from '@/generated/types';
+import { AppDispatch, RootState } from '@/store';
+import { ExcludeTypename } from '@/utils/graphql';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export interface ConfigState {
@@ -24,6 +26,18 @@ export const configSlice = createSlice({
 });
 
 export const { setConfig } = configSlice.actions;
+
+export async function loadConfig(dispatch: AppDispatch) {
+  try {
+    const { data: response } = await client.query({
+      query: GetConfigDocument,
+    });
+    const data = response.config as ExcludeTypename<typeof response.config>;
+    dispatch(setConfig({ data }));
+  } catch (error) {
+    console.error(error);
+  }
+}
 
 const configReducer = configSlice.reducer;
 

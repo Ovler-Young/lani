@@ -113,9 +113,17 @@ function UserProfile({ collapsed }: { collapsed: boolean }) {
             [styles.collapsed]: collapsed,
           })}
         >
-          <Avatar icon={<UserOutlined />} className={styles.avatar} />
+          {profile?.picture ? (
+            <Avatar src={profile.picture} className={styles.avatar} />
+          ) : (
+            <Avatar icon={<UserOutlined />} className={styles.avatar} />
+          )}
           <Typography.Text className={styles.username}>
-            {profile?.preferred_username ?? '用户'}
+            {profile?.preferred_username ??
+              profile?.nickname ??
+              profile?.name ??
+              profile?.email ??
+              '用户'}
           </Typography.Text>
         </div>
       </Popover>
