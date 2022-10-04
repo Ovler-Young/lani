@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 10
 ---
 
 # 入门
@@ -55,4 +55,4 @@ lani 目前仍然处于早期开发阶段，仍有很多需要完善的地方。
 
 此外，lani 目前与 [Jellyfin](https://jellyfin.org/) 深度结合，如果你并不是用 Jellyfin 看番，可能 lani 暂时还不适合你。
 
-> 那么，开始我们的<s>约会</s>战争吧——
+> 那么，开始我们的 <s>约会</s> 战争吧——

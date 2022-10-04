@@ -1,0 +1,125 @@
+---
+sidebar_position: 10
+---
+
+# 一体机容器
+
+[lani 一体机容器](https://github.com/std4453/lani/pkgs/container/lani-all-in-one) 包含了运行所需的各种服务，可以在任何支持 docker 的机器上运行。
+
+在此之前，你需要 [安装 docker](https://docs.docker.com/get-docker/)。
+
+### 配置
+
+lani 需要在运行之前配置，这包括：
+
+- [配置 PostgreSQL](../configuration/postgresql)
+- [配置 Jellyfin](../configuration/jellyfin)
+- [配置 qBittorrent](../configuration/qbittorrent)
+- [配置文件系统](../configuration/file-system)
+
+其余的配置并非必要，可以根据需求自行决定。
+
+完成配置之后，你需要将所有配置写进一个 [YAML](https://yaml.org/) 文件，像：
+
+```yaml
+postgresUrl: "postgres://user:pass@your_postgresql_server:5432/your_database"
+
+downloadClient:
+  kind: qbittorrent
+  qbittorrent:
+    apiEndpoint: http://your_qbittorrent_server
+    username: qbt_user
+    password: qbt_password
+  
+jellyfin:
+  apiEndpoint: http://your_jellyfin_server
+  apiToken: your_api_token
+  dummyUserId: dummy_user_id
+
+lani:
+  moveStrategy: hardLinkOrMove
+```
+
+### 准备目录
+
+你需要找一个合适的地方存放挂载到容器内的文件，在 Linux 上这通常是 `/srv` 或者 `/var`，在这里创建一个目录，比如 `/srv/lani`，然后：
+
+1. 将上述配置文件放在 `/srv/lani/config.yaml`
+2. 创建空目录 `/srv/lani/storage`
+
+### 启动一体机容器
+
+接着，用 `docker` 命令启动（将命令中的路径替换为实际路径）：
+
+```bash
+sudo docker run --detach \
+  --publish 8080:8080 \
+  --name lani_all_in_one \
+  --restart always \
+  --volume /srv/lani/config.yaml:/config/config.yaml \
+  --volume /srv/lani/storage:/storage \
+  ghcr.io/std4453/lani-all-in-one
+```
+
+:::tip
+
+`ghcr.io` 是 GitHub 的容器服务，有时无法正常访问，你可能需要 [配置网络代理](https://docs.docker.com/config/daemon/systemd/#httphttps-proxy)。
+
+:::
+
+启动后稍等片刻，访问 `http://localhost:8080`，你应当看到：
+
+![lani 截图](/img/lani-successful-start.png)
+
+Enjoy!
+
+### 如果存在问题……
+
+如果完成上述步骤后，未能成功访问网页，你可以使用 `docker logs` 查看运行日志，像：
+
+```bash
+docker logs lani_all_in_one
+```
+
+请复制日志，停止容器，并提交 [GitHub Issue](https://github.com/std4453/lani/issues)。
+
+### 高级配置
+
+这些配置可能会影响稳定性、破坏现有功能，甚至丢失数据。使用时你需要知道自己在做什么。
+
+<details>
+  <summary>展开</summary>
+
+  #### 环境变量
+  
+  启动容器时配置的环境变量传递到 lani 服务的各个部分上（即 `api-server`、`data-server` 和 `gateway`），比如 `DATA_SERVER_DEBUG` 会作为 `data-server` 的 `DEBUG` 变量传递到服务内部。
+
+  你可以在调试时使用这些变量，比如 `data-server` 使用 [`debug`](https://www.npmjs.com/package/debug) 输出日志，你可以配置 `DEBUG=*` 使其打印详细的全部日志。
+
+  请注意不要修改 `PORT` 变量，否则服务将无法启动。
+
+  #### 配置 PM2
+
+  一体机容器中使用 [PM2](https://pm2.keymetrics.io/) 启动各个服务，你可以挂载并覆盖 `/deploy/apps/all-in-one/ecosystem.config.js` 文件来定制 PM2 行为。你可能需要原版文件上修改，以免破坏现有功能。
+
+  #### 配置 nginx
+
+  一体机容器中使用 [Nginx](https://www.nginx.com/) 合并各个服务，你可以挂载到 `/etc/nginx/nginx.conf` 等位置来覆盖现有的 nginx 配置。
+
+  如果需要 HTTPS，建议在容器外再配置一层反向代理，而非配置容器内 Nginx。
+
+  #### 暴露额外端口
+
+  容器内的端口如下：
+
+  | 端口 | 服务 |
+  | --- | --- |
+  | 8080 | Nginx |
+  | 8081 | `gateway` |
+  | 8082 | `api-server` |
+  | 8083 | `data-server` |
+  | 9000 | MinIO API |
+  | 9001 | MinIO 后台 |
+
+  这些端口可以用于调试，但由于缺少鉴权，**请勿**将它们对外暴露。其中，MinIO 后台使用默认用户名 `minioadmin` 和密码 `minioadmin`。
+</details>

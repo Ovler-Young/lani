@@ -1,0 +1,29 @@
+---
+sidebar_position: 5
+---
+
+# 配置 PostgreSQL
+
+首先你需要 [安装 PostgreSQL](https://www.postgresql.org/download/)。
+
+接着，你需要为数据库用户找一个超强的密码。
+
+然后，创建用户，假设名为 `lani_user`：
+
+```sql
+CREATE USER lani_user PASSWORD '<超强密码>';
+```
+
+最后，创建新的 database，假设名为 `lani`：
+
+```sql
+CREATE DATABASE lani WITH OWNER lani_user;
+```
+
+### YAML 配置
+
+完整配置如下：
+
+```yaml
+postgresUrl: postgres://<用户名>:<密码>@<数据库地址>:<端口>/<database名称>
+```
