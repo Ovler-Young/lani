@@ -28,11 +28,6 @@ if [ "$COPY_CONFIG" = true ] ; then
         cp -v -f /config/gateway.env /deploy/apps/gateway/.env
     fi
 
-    # admin
-    if [ -e /config/admin.json ] ; then
-        cp -v -f /config/admin.json /deploy/apps/admin/dist/config.json
-    fi
-
     # db
     if [ -e /config/db.env ] ; then
         cp -v -f /config/db.env /deploy/libs/db/.env

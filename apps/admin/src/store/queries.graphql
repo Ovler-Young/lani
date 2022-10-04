@@ -1,0 +1,8 @@
+query GetConfig {
+  config {
+    jellyfin {
+      publicHost
+      serverId
+    }
+  }
+}

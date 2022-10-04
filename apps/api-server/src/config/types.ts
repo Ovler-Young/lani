@@ -21,6 +21,7 @@ export interface JellyfinConfig {
   dummyUserId: string;
   pathMapping: PathMapping;
   publicHost: string;
+  serverId: string;
 }
 
 export interface LaniConfig {

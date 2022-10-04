@@ -32,6 +32,7 @@ type AuthorizationConfig =
 
 type AuthConfig = {
   issuer: string;
+  clientId: string;
 } & AuthorizationConfig;
 
 export interface ConfigType {
@@ -59,18 +60,21 @@ export default loadConfigSync<ConfigType>({
         Joi.object({
           enabled: Joi.boolean().truthy().required(),
           issuer: Joi.string().required(),
+          clientId: Joi.string().required(),
           type: Joi.string().valid("group").required(),
           group: Joi.string().required(),
         }),
         Joi.object({
           enabled: Joi.boolean().truthy().required(),
           issuer: Joi.string().required(),
+          clientId: Joi.string().required(),
           type: Joi.string().valid("role").required(),
           role: Joi.string().required(),
         }),
         Joi.object({
           enabled: Joi.boolean().truthy().required(),
           issuer: Joi.string().required(),
+          clientId: Joi.string().required(),
           type: Joi.string().valid("audience").required(),
           audience: Joi.string().required(),
         })

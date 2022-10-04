@@ -2,11 +2,11 @@ import laniText from '@/assets/lani-text.svg';
 import { selectCollapsed, setCollapsed } from '@/store/app';
 import {
   logout,
+  selectAuth,
   selectHasAccountPage,
   selectProfile,
   toAccountPage,
 } from '@/store/auth';
-import { selectConfig } from '@/store/config';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import useMobile from '@/utils/useMobile';
 import {
@@ -137,7 +137,7 @@ function UserProfile({ collapsed }: { collapsed: boolean }) {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function Layout(props: any) {
   const collapsed = useAppSelector(selectCollapsed);
-  const config = useAppSelector(selectConfig);
+  const auth = useAppSelector(selectAuth);
   const dispatch = useAppDispatch();
 
   const mobile = useMobile();
@@ -193,7 +193,7 @@ export default function Layout(props: any) {
       }}
       className={styles.layout}
       menuFooterRender={() =>
-        config?.auth?.enabled ? <UserProfile collapsed={collapsed} /> : null
+        auth.config?.enabled ? <UserProfile collapsed={collapsed} /> : null
       }
     />
   );

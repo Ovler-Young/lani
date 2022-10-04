@@ -1,4 +1,6 @@
 import {
+  AdminConfig,
+  JellyfinConfig,
   SearchBangumiSeason,
   UpdateSeasonDownloadSourcesInput,
 } from '@/admin/index.model';
@@ -9,6 +11,7 @@ import {
   SubjectType,
 } from '@/api/bangumi';
 import { PrismaService } from '@/common/prisma.service';
+import config from '@/config';
 import { JobService } from '@/download-job/index.service';
 import { env } from '@/env';
 import { SeasonEmitService } from '@/season-emit/index.service';
@@ -27,6 +30,16 @@ export class AdminResolver {
   @Query(() => ID)
   environment() {
     return env;
+  }
+
+  @Query(() => AdminConfig)
+  config(): AdminConfig {
+    return {
+      jellyfin: {
+        publicHost: config.jellyfin.publicHost,
+        serverId: config.jellyfin.serverId,
+      },
+    };
   }
 
   @Mutation(() => ID)

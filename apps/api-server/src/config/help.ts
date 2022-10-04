@@ -52,6 +52,7 @@ function jellyfinConfigSchema(): Joi.ObjectSchema<JellyfinConfig> {
     dummyUserId: Joi.string().required(),
     pathMapping: pathMappingSchema(),
     publicHost: Joi.string().uri().default(Joi.ref('apiEndpoint')),
+    serverId: Joi.string().required(),
   });
 }
 

@@ -1,10 +1,19 @@
 import config from "@/config";
 import { ApolloGateway, IntrospectAndCompose } from "@apollo/gateway";
 import { getPort } from "@lani/framework";
-import { ApolloServer, AuthenticationError } from "apollo-server";
 import { getIntrospectionQuery, parse, print } from "graphql";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import { Issuer } from "openid-client";
+
+import { ApolloServer } from "apollo-server-express";
+import {
+  ApolloServerPluginDrainHttpServer,
+  ApolloServerPluginLandingPageLocalDefault,
+  ContextFunction,
+  AuthenticationError,
+} from "apollo-server-core";
+import express from "express";
+import http from "http";
 
 (async () => {
   const gateway = new ApolloGateway({
@@ -14,8 +23,7 @@ import { Issuer } from "openid-client";
     }),
   });
 
-  let context: ConstructorParameters<typeof ApolloServer>[0]["context"] =
-    undefined;
+  let context: ContextFunction | undefined = undefined;
 
   if (config.auth.enabled) {
     const { issuer: issuerUrl } = config.auth;
@@ -68,12 +76,54 @@ import { Issuer } from "openid-client";
     };
   }
 
+  const app = express();
+  const httpServer = http.createServer(app);
   const server = new ApolloServer({
     gateway,
     context,
+    cache: "bounded",
+    plugins: [
+      ApolloServerPluginDrainHttpServer({ httpServer }),
+      ApolloServerPluginLandingPageLocalDefault({ embed: true }),
+    ],
+  });
+  await server.start();
+  server.applyMiddleware({ app });
+
+  app.get("/auth_config", (_req, res) => {
+    res.send({
+      enabled: config.auth.enabled,
+      ...(config.auth.enabled
+        ? {
+            config: {
+              authority: config.auth.issuer,
+              client_id: config.auth.clientId,
+            },
+            authorization: {
+              enabled: true,
+              type: config.auth.type,
+              ...(config.auth.type === "group"
+                ? {
+                    group: config.auth.group,
+                  }
+                : config.auth.type === "role"
+                ? {
+                    role: config.auth.role,
+                  }
+                : config.auth.type === "audience"
+                ? {
+                    audience: config.auth.audience,
+                  }
+                : undefined),
+            },
+          }
+        : undefined),
+    });
   });
 
-  const { url } = await server.listen(getPort(8080));
-
-  console.log(`🚀 Server ready at ${url}`);
+  const port = getPort(8080);
+  await new Promise<void>((resolve) => httpServer.listen({ port }, resolve));
+  console.log(
+    `🚀 Server ready at http://localhost:${port}${server.graphqlPath}`
+  );
 })();

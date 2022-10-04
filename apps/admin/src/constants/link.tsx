@@ -7,9 +7,9 @@ export function jellyfinEpisodeLink(jellyfinEpisodeId: string) {
     return '';
   }
   const {
-    jellyfin: { host, serverId },
+    jellyfin: { publicHost, serverId },
   } = config;
-  return `${host}/web/index.html#!/details?serverId=${serverId}&id=${jellyfinEpisodeId}`;
+  return `${publicHost}/web/index.html#!/details?serverId=${serverId}&id=${jellyfinEpisodeId}`;
 }
 
 export function jellyfinSeasonLink(jellyfinSeasonId: string) {
@@ -18,9 +18,9 @@ export function jellyfinSeasonLink(jellyfinSeasonId: string) {
     return '';
   }
   const {
-    jellyfin: { host, serverId },
+    jellyfin: { publicHost, serverId },
   } = config;
-  return `${host}/web/index.html#!/details?serverId=${serverId}&id=${jellyfinSeasonId}`;
+  return `${publicHost}/web/index.html#!/details?serverId=${serverId}&id=${jellyfinSeasonId}`;
 }
 
 export function bilibiliSeasonLink(ssid: string) {

@@ -1,30 +1,60 @@
 import { AppDispatch, AppGetState, RootState } from '@/store';
-import { AuthConfig, selectConfig } from '@/store/config';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Log, UserManager, UserProfile } from 'oidc-client-ts';
+import { UserManager, UserManagerSettings, UserProfile } from 'oidc-client-ts';
+
+type WithEnabled<T> =
+  | {
+      enabled: false;
+    }
+  | ({
+      enabled: true;
+    } & T);
+
+interface GroupAuthorization {
+  type: 'group';
+  group: string;
+}
+
+type AuthorizationConfig = GroupAuthorization;
+
+interface AuthConfig {
+  config: Omit<UserManagerSettings, 'redirect_uri' | 'response_mode'>;
+  authorization?: WithEnabled<AuthorizationConfig>;
+}
+
+type AuthConfigConditional = WithEnabled<AuthConfig>;
 
 export interface AuthState {
   userManager: UserManager | undefined;
-  authroized: boolean;
+  authorized: boolean;
   authenticated: boolean;
   loading: boolean;
   profile: UserProfile | undefined;
   token: string | undefined;
+  config: AuthConfigConditional | undefined;
 }
 
 const initialState: AuthState = {
   userManager: undefined,
-  authroized: false,
+  authorized: false,
   authenticated: false,
   loading: true,
   profile: undefined,
   token: undefined,
+  config: undefined,
 };
 
 export const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
+    setConfig: (
+      state,
+      { payload: { config } }: PayloadAction<{ config: AuthConfigConditional }>,
+    ) => {
+      state.config = config;
+    },
+
     setUserManager: (
       state,
       { payload: { userManager } }: PayloadAction<{ userManager: UserManager }>,
@@ -43,7 +73,7 @@ export const authSlice = createSlice({
       }>,
     ) => {
       state.profile = profile;
-      state.authroized = authorized;
+      state.authorized = authorized;
       state.authenticated = true;
       state.token = token;
       state.loading = false;
@@ -51,11 +81,16 @@ export const authSlice = createSlice({
     loginError: (state) => {
       state.loading = false;
     },
+    loginSkipped: (state) => {
+      state.loading = false;
+      state.authenticated = true;
+      state.authorized = true;
+    },
   },
 });
 
-const { setUserManager } = authSlice.actions;
-export const { loginError, loginSuccess } = authSlice.actions;
+const { setUserManager, setConfig, loginSkipped, loginError, loginSuccess } =
+  authSlice.actions;
 
 export async function logout(_dispatch: AppDispatch, getState: AppGetState) {
   const manager = getState().auth.userManager;
@@ -100,13 +135,22 @@ function checkAuthorization(config: AuthConfig, profile: UserProfile) {
   return false;
 }
 
-export async function login(dispatch: AppDispatch, getState: AppGetState) {
+async function fetchAuthConfig() {
+  const resp = await fetch('/api/gateway/auth_config');
+  const data = await resp.json();
+  return data as AuthConfigConditional;
+}
+
+export async function login(dispatch: AppDispatch) {
   try {
-    const config = selectConfig(getState());
-    if (!config || !config.auth.enabled) {
-      throw new Error('Invalid auth config');
+    const authConfig = await fetchAuthConfig();
+
+    dispatch(setConfig({ config: authConfig }));
+
+    if (!authConfig.enabled) {
+      dispatch(loginSkipped());
+      return;
     }
-    const authConfig = config.auth;
 
     const manager = new UserManager({
       ...authConfig.config,
@@ -148,11 +192,7 @@ export async function login(dispatch: AppDispatch, getState: AppGetState) {
   }
 }
 
-export async function initAuth(dispatch: AppDispatch, getState: AppGetState) {
-  const config = getState().config;
-  if (!config?.data?.auth?.enabled) {
-    return;
-  }
+export async function initAuth(dispatch: AppDispatch) {
   await dispatch(login);
 }
 
