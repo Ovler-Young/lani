@@ -37,6 +37,9 @@ fi
 # Run database migration
 (cd /deploy/libs/db; npm run migrate:deploy)
 
+# Create bucket
+mkdir -p /storage/images
+
 trap "exit 255" SIGINT SIGTERM
 
 nginx -g "daemon off;" &

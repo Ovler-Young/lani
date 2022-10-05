@@ -66,6 +66,7 @@ function laniConfigSchema(): Joi.ObjectSchema<LaniConfig> {
 function s3ConfigSchema(): Joi.ObjectSchema<S3Config> {
   return Joi.object({
     bucket: Joi.string().required(),
+    publicHost: Joi.string(),
   }).pattern(Joi.string(), Joi.any());
 }
 

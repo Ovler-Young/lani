@@ -31,6 +31,7 @@ export interface LaniConfig {
 
 export interface S3Config extends AWS.S3.Types.ClientConfiguration {
   bucket: string;
+  publicHost?: string;
 }
 
 export interface LarkConfig {

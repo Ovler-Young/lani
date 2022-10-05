@@ -51,6 +51,13 @@ const apps = [
     },
     autorestart: true,
   },
+  {
+    name: "minio",
+    script: "minio",
+    cwd: "/storage",
+    args: "server /storage --console-address 0.0.0.0:9001",
+    autorestart: true,
+  },
 ];
 
 module.exports = apps;
