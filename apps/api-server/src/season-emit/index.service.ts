@@ -38,8 +38,13 @@ export class SeasonEmitService {
 
     // 如果重命名了，自动视为已修改
     let modified = renamed;
-    modified ||= await this.emitNfo(season);
-    modified ||= await this.emitImages(season);
+    // ||=会短路，不能用
+    if (await this.emitNfo(season)) {
+      modified = true;
+    }
+    if (await this.emitImages(season)) {
+      modified = true;
+    }
 
     if (modified) {
       console.log(
