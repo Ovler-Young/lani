@@ -12,5 +12,5 @@ export const { postgresUrl, postgraphile } = loadConfigSync<{
       Joi.string(),
       Joi.any()
     ),
-  }),
+  }).pattern(Joi.string(), Joi.any()),
 });

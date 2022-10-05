@@ -15,12 +15,10 @@
     "@lani/gateway": "~1.0.0",
     "@lani/db": "~1.0.0"
   },
-  "dependencies": {
-    "dotenv": "~16.0.3"
-  },
   "files": [
     "/nginx.conf",
     "/start.sh",
-    "/ecosystem.config.js"
+    "/ecosystem.config.js",
+    "/defaults.yaml"
   ]
 }

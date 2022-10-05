@@ -157,5 +157,5 @@ export function rootConfigSchema(): Joi.ObjectSchema<RootConfig> {
     jellyfin: jellyfinConfigSchema().required(),
     notifications: notificationsConfigSchema().required(),
     lani: laniConfigSchema().required(),
-  });
+  }).pattern(Joi.string(), Joi.any());
 }

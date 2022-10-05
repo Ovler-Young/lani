@@ -1,0 +1,27 @@
+s3:
+  credentials:
+    accessKeyId: minioadmin
+    secretAccessKey: minioadmin
+  region: ""
+  bucket: images
+  endpoint: http://127.0.0.1:9000
+  s3ForcePathStyle: true
+  publicHost: /api/storage/images/
+
+subgraphs:
+  - name: data
+    url: http://localhost:8083/graphql
+  - name: api
+    url: http://localhost:8082/graphql
+  
+postgraphile:
+  setofFunctionsContainNulls: true
+  ignoreRBAC: true
+  showErrorStack: json
+  extendedErrors:
+    - hint
+    - detail
+    - errcode
+  graphiql: false
+  allowExplain: false
+  watchPg: false

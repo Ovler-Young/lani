@@ -62,5 +62,5 @@ export default loadConfigSync<ConfigType>({
         })
       )
       .required(),
-  }),
+  }).pattern(Joi.string(), Joi.any()),
 });
