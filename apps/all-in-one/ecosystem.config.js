@@ -58,6 +58,12 @@ const apps = [
     args: "server /storage --console-address 0.0.0.0:9001",
     autorestart: true,
   },
+  {
+    name: "nginx",
+    script: "nginx",
+    args: '-g "daemon off;"',
+    autorestart: true,
+  }
 ];
 
 module.exports = apps;

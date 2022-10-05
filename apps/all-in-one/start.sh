@@ -40,13 +40,5 @@ fi
 # Create bucket
 mkdir -p /storage/images
 
-trap "exit 255" SIGINT SIGTERM
-
-nginx -g "daemon off;" &
-
-pm2-runtime /deploy/apps/all-in-one/ecosystem.config.js &
-
-wait -n
-
-exit $?
- 
+# Replace bash process
+exec pm2-runtime /deploy/apps/all-in-one/ecosystem.config.js
