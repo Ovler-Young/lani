@@ -1,16 +1,15 @@
-import { loadConfigSync } from "@lani/framework";
-import Joi from "joi";
+import { loadConfigSync, root, str, T, use } from "@lani/framework";
 import { PostGraphileOptions } from "postgraphile";
 
-export const { postgresUrl, postgraphile } = loadConfigSync<{
-  postgresUrl: string;
-  postgraphile?: PostGraphileOptions;
-}>({
-  schema: Joi.object({
-    postgresUrl: Joi.string().required(),
-    postgraphile: Joi.object<PostGraphileOptions>({}).pattern(
-      Joi.string(),
-      Joi.any()
-    ),
-  }).pattern(Joi.string(), Joi.any()),
+const postgresUrl = str();
+
+const postgraphile = use<PostGraphileOptions>();
+
+const schema = root({
+  postgresUrl,
+  postgraphile,
+});
+
+export const config = loadConfigSync<T<typeof schema>>({
+  schema,
 });

@@ -130,6 +130,10 @@ export const ext =
   <Type>() =>
   <O0 extends D>(o: O0): D<T<O0> & Type> =>
     as((o as any as Joi.ObjectSchema).pattern(Joi.string(), Joi.any()));
+    
+export const use = <Type>(
+  schema: Joi.ObjectSchema<Type> = Joi.object<Type>({})
+): D<Type> => as(schema.pattern(Joi.string(), Joi.any()));
 
 interface Either {
   (): D<never>;

@@ -1,7 +1,4 @@
-import {
-  postgraphile as confPostgraphileOptions,
-  postgresUrl as confPostgresUrl,
-} from "@/config";
+import { config } from "@/config";
 import OmitArchivedPlugin from "@graphile-contrib/pg-omit-archived";
 import FederationPlugin from "@graphile/federation";
 import { env, getPort } from "@lani/framework";
@@ -18,7 +15,7 @@ const options: PostGraphileOptions = {
   graphileBuildOptions: {
     connectionFilterRelations: true,
   },
-  ...confPostgraphileOptions,
+  ...config.postgraphile,
   // 开发模式启用 graphiql
   ...(env === "dev"
     ? {
@@ -30,5 +27,5 @@ const options: PostGraphileOptions = {
 };
 
 const app = new Koa();
-app.use(postgraphile(confPostgresUrl, "public", options));
+app.use(postgraphile(config.postgresUrl, "public", options));
 app.listen(getPort(8080));
