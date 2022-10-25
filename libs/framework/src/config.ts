@@ -1,4 +1,4 @@
-import { env, Env, resolveChroot } from "@/env";
+import { env, Env } from "@/env";
 import fs from "fs";
 import Joi from "joi";
 import * as yaml from "js-yaml";
@@ -44,10 +44,10 @@ function loadConfigFilename<T>({
   if (envOverrideFilename) {
     const filenameFromEnv = process.env.CONFIG_FILENAME;
     if (filenameFromEnv) {
-      return resolveChroot(filenameFromEnv);
+      return filenameFromEnv;
     }
   }
-  return resolveChroot(filename);
+  return filename;
 }
 
 export function loadConfigSync<T = any>(options: LoadConfigOptions<T> = {}): T {
