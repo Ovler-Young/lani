@@ -19,7 +19,7 @@ import http from "http";
   const gateway = new ApolloGateway({
     supergraphSdl: new IntrospectAndCompose({
       subgraphs: config.subgraphs,
-      pollIntervalInMs: config.pollIntervalInMs,
+      pollIntervalInMs: config.debug.pollIntervalInMs,
     }),
   });
 

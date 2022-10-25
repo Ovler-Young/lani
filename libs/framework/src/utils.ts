@@ -13,6 +13,8 @@ export const str = (): D<string> => as(Joi.string().required());
 
 export const num = (): D<number> => as(Joi.number().required());
 
+export const any = (): D<any> => as(Joi.any().required());
+
 export const v = <S extends string>(string: S): D<S> =>
   as(Joi.allow(string).required());
 

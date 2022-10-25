@@ -1,66 +1,54 @@
-import { ServiceEndpointDefinition } from "@apollo/gateway";
-import { loadConfigSync, mergeConfig } from "@lani/framework";
-import Joi from "joi";
+import {
+  any,
+  arr,
+  enabled,
+  loadConfigSync,
+  num,
+  obj,
+  opt,
+  root,
+  str,
+  T,
+} from "@lani/framework";
 
-type WithEnabled<T> =
-  | {
-      enabled: false;
-    }
-  | ({
-      enabled: true;
-    } & T);
+const subgraphs = arr(
+  obj({
+    name: str(),
+    url: str(),
+  })
+);
 
-interface AuthorizationConfig {
-  query: string;
-  result: any;
-}
+const debug = opt(
+  obj({
+    pollIntervalInMs: opt(num()),
+  }),
+  {}
+);
 
-interface AuthConfig {
-  authority: string;
-  clientId: string;
-  authz?: WithEnabled<AuthorizationConfig>;
-  clientConfig?: Record<string, any>;
-}
+const authz = enabled(
+  obj({
+    query: str(),
+    result: any(),
+  })
+);
 
-export interface ConfigType {
-  subgraphs: ServiceEndpointDefinition[];
-  pollIntervalInMs?: number;
-  auth: WithEnabled<AuthConfig>;
-}
+const auth = enabled(
+  obj({
+    authority: str(),
+    clientId: str(),
+    authz,
+    clientConfig: opt(any()),
+  })
+);
+
+const schema = root({
+  subgraphs,
+  debug,
+  auth,
+});
+
+type ConfigType = T<typeof schema>;
 
 export default loadConfigSync<ConfigType>({
-  schema: Joi.object({
-    subgraphs: Joi.array()
-      .items(
-        Joi.object({
-          name: Joi.string().required(),
-          url: Joi.string().required(),
-        })
-      )
-      .required(),
-    pollIntervalInMs: Joi.number(),
-    auth: Joi.alternatives()
-      .try(
-        Joi.object({
-          enabled: Joi.boolean().falsy().required(),
-        }),
-        Joi.object({
-          enabled: Joi.boolean().truthy().required(),
-          authority: Joi.string().required(),
-          clientId: Joi.string().required(),
-          authz: Joi.alternatives().try(
-            Joi.object({
-              enabled: Joi.boolean().falsy().required(),
-            }),
-            Joi.object({
-              enabled: Joi.boolean().truthy().required(),
-              query: Joi.string().required(),
-              result: Joi.any().required(),
-            })
-          ),
-          clientConfig: Joi.object(),
-        })
-      )
-      .required(),
-  }).pattern(Joi.string(), Joi.any()),
+  schema,
 });
