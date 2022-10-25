@@ -1,4 +1,4 @@
-import { config } from "@/config";
+import config from "@/config";
 import OmitArchivedPlugin from "@graphile-contrib/pg-omit-archived";
 import FederationPlugin from "@graphile/federation";
 import { env, getPort } from "@lani/framework";

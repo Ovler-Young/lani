@@ -10,6 +10,6 @@ const schema = root({
   postgraphile,
 });
 
-export const config = loadConfigSync<T<typeof schema>>({
+export default loadConfigSync<T<typeof schema>>({
   schema,
 });
