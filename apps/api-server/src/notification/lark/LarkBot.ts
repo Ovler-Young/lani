@@ -34,9 +34,7 @@ export class LarkBot
   private conf: lark.core.Config;
 
   constructor(private s3: S3Service) {
-    const {
-      notifications: { lark: larkConfig },
-    } = config;
+    const { notifications: { lark: larkConfig } = {} } = config;
     if (!larkConfig) {
       throw new Error('lark is not configured!');
     }

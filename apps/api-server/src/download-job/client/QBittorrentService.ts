@@ -1,4 +1,4 @@
-import { AxiosService } from '@/common/axios.service';
+import { AxiosService, getAxiosConfig } from '@/common/axios.service';
 import config from '@/config';
 import { QBittorrentConfig } from '@/config/types';
 import { QBTFiles, QBTTorrent, QBTTorrents } from '@/download-job/types';
@@ -51,7 +51,7 @@ export class QBittorrentService extends AxiosService {
   constructor() {
     super({
       baseURL: `${getQBittorrentConfig().apiEndpoint}/api/v2`,
-      timeout: config.network.timeout.local,
+      ...getAxiosConfig('local'),
     });
     this.qbtConfig = getQBittorrentConfig();
     this.interceptors.request.use((config) => {

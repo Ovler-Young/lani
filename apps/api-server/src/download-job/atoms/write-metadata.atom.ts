@@ -1,10 +1,8 @@
 import { PrismaService } from '@/common/prisma.service';
-import config from '@/config';
 import { DateFormat } from '@/constants/date-format';
 import { AsyncAtom, StepInput } from '@/download-job/atoms';
 import { DownloadWorkflowDefinition } from '@/download-job/atoms/types';
 import { ensureXMLRoot, mergeXMLNode } from '@/utils/xml';
-import { resolveChroot } from '@lani/framework';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import dayjs from 'dayjs';
@@ -39,14 +37,11 @@ export class WriteMetadataAtom extends AsyncAtom<
       importFile: { filePath },
     } = steps;
     const nfoPath = filePath.replace(path.extname(filePath), '').concat('.nfo');
-    const actualNfoPath = resolveChroot(
-      path.join(config.lani.mediaRoot, nfoPath),
-    );
     // xml2js 对象结构没有类型，只能用 any
     let xmlObj: any = {};
     try {
-      await fs.stat(actualNfoPath);
-      const currentContent = await fs.readFile(actualNfoPath, 'utf8');
+      await fs.stat(nfoPath);
+      const currentContent = await fs.readFile(nfoPath, 'utf8');
       xmlObj = await this.parser.parseStringPromise(currentContent);
     } catch (error) {
       // 若文件不存在，xml格式有问题，无视报错，因为之后会覆盖它
@@ -77,7 +72,7 @@ export class WriteMetadataAtom extends AsyncAtom<
       xmlObj.episodedetails,
     );
     const nfoContent = this.builder.buildObject(xmlObj);
-    await fs.writeFile(actualNfoPath, nfoContent, 'utf-8');
+    await fs.writeFile(nfoPath, nfoContent, 'utf-8');
     return {
       nfoPath,
     };

@@ -3,7 +3,6 @@ import config from '@/config';
 import { AsyncAtom, StepInput } from '@/download-job/atoms';
 import { DownloadWorkflowDefinition } from '@/download-job/atoms/types';
 import { mapPath } from '@/utils/path';
-import { resolveChroot } from '@lani/framework';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import fs from 'fs/promises';
@@ -16,6 +15,59 @@ export class ImportFileAtom extends AsyncAtom<
 > {
   constructor(emitter: EventEmitter2, private prisma: PrismaService) {
     super(emitter, 'importFile');
+  }
+
+  private async tryHardLink(
+    sourcePath: string,
+    targetPath: string,
+  ): Promise<boolean> {
+    // 源文件不存在，报错
+    const { ino: sourceIno } = await fs.stat(sourcePath);
+    try {
+      const { ino: targetIno } = await fs.stat(targetPath);
+      // 如果目标文件存在但ino不同，覆盖之
+      if (sourceIno !== targetIno) {
+        await fs.unlink(targetPath);
+        try {
+          await fs.link(sourcePath, targetPath);
+        } catch (error) {
+          if (error.code === 'EXDEV') {
+            // mount point 不同，无法硬链接
+            return false;
+          } else {
+            throw error;
+          }
+        }
+      }
+      // 如果ino相同，则内容一定相同，不需要操作
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        // 如果目标文件不存在，无视错误
+        try {
+          await fs.link(sourcePath, targetPath);
+        } catch (error) {
+          if (error.code === 'EXDEV') {
+            // mount point 不同，无法硬链接
+            return false;
+          } else {
+            throw error;
+          }
+        }
+      } else {
+        throw error;
+      }
+    }
+    return true;
+  }
+
+  private async copy(sourcePath: string, targetPath: string) {
+    // 自动覆盖目标文件
+    await fs.copyFile(sourcePath, targetPath);
+  }
+
+  private async move(sourcePath: string, targetPath: string) {
+    // 自动覆盖目标文件
+    await fs.rename(sourcePath, targetPath);
   }
 
   async run(
@@ -42,13 +94,12 @@ export class ImportFileAtom extends AsyncAtom<
     if (!seasonRoot) {
       throw new Error('jellyfinFolder not set');
     }
-    const mappedImportPath = resolveChroot(
-      mapPath(
-        config.downloadClient.pathMapping,
-        steps.findVideoFile.importPath,
-      ),
+
+    const sourcePath = mapPath(
+      config.downloadClient[config.downloadClient.kind].pathMapping,
+      steps.findVideoFile.importPath,
     );
-    const filePath = path.join(
+    const targetPath = path.join(
       seasonRoot,
       seasonTitle,
       // 不加这个 jellyfin识别就会很成问题，还是加上
@@ -57,30 +108,36 @@ export class ImportFileAtom extends AsyncAtom<
         steps.findVideoFile.importPath,
       )}`,
     );
-    const absoluteFilePath = resolveChroot(
-      path.join(config.lani.mediaRoot, filePath),
-    );
-    await fs.mkdir(path.dirname(absoluteFilePath), { recursive: true });
-    // 如果源文件不存在，这里直接报错
-    const { ino: sourceIno } = await fs.stat(mappedImportPath);
-    try {
-      const { ino: targetIno } = await fs.stat(absoluteFilePath);
-      // 如果目标文件存在但ino不同，覆盖之
-      if (sourceIno !== targetIno) {
-        await fs.unlink(absoluteFilePath);
-        await fs.link(mappedImportPath, absoluteFilePath);
-      }
-      // 如果ino相同，则内容一定相同，不需要操作
-    } catch (error) {
-      if (error.code === 'ENOENT') {
-        // 如果目标文件不存在，无视错误
-        await fs.link(mappedImportPath, absoluteFilePath);
-      } else {
-        throw error;
-      }
+    await fs.mkdir(path.dirname(targetPath), { recursive: true });
+
+    switch (config.lani.moveStrategy) {
+      case 'hardLinkOnly':
+        if (!(await this.tryHardLink(sourcePath, targetPath))) {
+          throw new Error('cannot hard link between different mount points');
+        }
+        break;
+      case 'hardLinkOrCopy':
+        if (await this.tryHardLink(sourcePath, targetPath)) {
+          break;
+        }
+        await this.copy(sourcePath, targetPath);
+        break;
+      case 'hardLinkOrMove':
+        if (await this.tryHardLink(sourcePath, targetPath)) {
+          break;
+        }
+        await this.move(sourcePath, targetPath);
+        break;
+      case 'copyOnly':
+        await this.copy(sourcePath, targetPath);
+        break;
+      case 'moveOnly':
+        await this.move(sourcePath, targetPath);
+        break;
     }
+
     return {
-      filePath,
+      filePath: targetPath,
     };
   }
 }

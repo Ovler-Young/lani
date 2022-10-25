@@ -1,6 +1,5 @@
 import {
   AdminConfig,
-  JellyfinConfig,
   SearchBangumiSeason,
   UpdateSeasonDownloadSourcesInput,
 } from '@/admin/index.model';
@@ -35,10 +34,11 @@ export class AdminResolver {
   @Query(() => AdminConfig)
   config(): AdminConfig {
     return {
-      jellyfin: {
-        publicHost: config.jellyfin.publicHost,
-        serverId: config.jellyfin.serverId,
-      },
+      jellyfin: config.jellyfin.publicHost
+        ? {
+            publicHost: config.jellyfin.publicHost,
+          }
+        : undefined,
     };
   }
 

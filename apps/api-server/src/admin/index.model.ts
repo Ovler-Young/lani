@@ -25,10 +25,9 @@ export class SearchBangumiSeason {
 @ObjectType()
 export class JellyfinConfig {
   publicHost: string;
-  serverId: string;
 }
 
 @ObjectType()
 export class AdminConfig {
-  jellyfin: JellyfinConfig;
+  jellyfin?: JellyfinConfig;
 }
