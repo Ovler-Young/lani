@@ -32,6 +32,7 @@ import { ApolloClient, useApolloClient, useQuery } from '@apollo/client';
 import { Button, message, Popconfirm, Space, Typography } from 'antd';
 import { ColumnFilterItem } from 'antd/lib/table/interface';
 import clsx from 'clsx';
+import dayjs from 'dayjs';
 import { useMemo, useRef } from 'react';
 import { useHistory } from 'umi';
 import styles from './index.module.less';
@@ -172,19 +173,21 @@ function useColumns() {
           },
         },
         {
-          title: '放送时间',
-          key: 'airTime',
-          width: 120,
+          title: '首播时间',
+          dataIndex: 'firstAired',
+          width: 160,
           search: false,
           render: (_, r) => {
-            if (typeof r.weekday !== 'number') {
+            const firstAir = r.firstEpisode.edges[0]?.node?.airTime;
+            if (!firstAir) {
               return '-';
-            }
-            if (!r.airTime) {
-              return weekdayToText[r.weekday];
             } else {
-              return `${weekdayToText[r.weekday]} ${r.airTime}`;
+              return dayjs(firstAir).format('YYYY-MM-DD');
             }
+          },
+          sorter: true,
+          stateKey: {
+            sort: 'firstAired',
           },
         },
         {
@@ -231,7 +234,7 @@ function useColumns() {
           title: '最新集',
           tooltip: '季度最新一集的下载状态',
           key: 'latestEpisode',
-          width: 96,
+          width: 120,
           render: (_, r) => {
             if (!r.isMonitoring) {
               return '-';
@@ -406,9 +409,11 @@ async function querySeasons(
   {
     id: idSort,
     title: titleSort,
+    firstAired: firstAiredSort,
   }: {
     id?: 'ascend' | 'descend';
     title?: 'ascend' | 'descend';
+    firstAired?: 'ascend' | 'descend';
   },
   // filter
   {
@@ -537,6 +542,11 @@ async function querySeasons(
       ? idSort === 'ascend'
         ? [SeasonsOrderBy.IdAsc]
         : [SeasonsOrderBy.IdDesc]
+      : []),
+    ...(firstAiredSort
+      ? firstAiredSort === 'ascend'
+        ? [SeasonsOrderBy.EpisodesBySeasonIdMinAirTimeAsc]
+        : [SeasonsOrderBy.EpisodesBySeasonIdMinAirTimeDesc]
       : []),
   ];
   const { data, error } = await client.query({

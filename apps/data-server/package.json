@@ -20,7 +20,8 @@
     "@graphile-contrib/pg-omit-archived": "~2.1.0",
     "@graphile/federation": "~0.1.0",
     "koa": "~2.13.4",
-    "joi": "~17.6.0"
+    "joi": "~17.6.0",
+    "@graphile-contrib/pg-order-by-related": "~1.0.0-beta.6"
   },
   "devDependencies": {
     "typescript": "~4.5.4",
