@@ -43,6 +43,11 @@ export default defineConfig({
           name: '下载任务',
           wrappers: ['@/wrappers/auth'],
         },
+        {
+          path: '/redirect',
+          exact: true,
+          component: '@/pages/302',
+        },
         { component: '@/pages/404' },
       ],
     },

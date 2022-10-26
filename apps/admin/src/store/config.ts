@@ -1,82 +1,41 @@
+import { client } from '@/client';
+import { AdminConfig, GetConfigDocument } from '@/generated/types';
 import { AppDispatch, RootState } from '@/store';
+import { ExcludeTypename } from '@/utils/graphql';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { UserManagerSettings } from 'oidc-client-ts';
-
-type WithEnabled<T> =
-  | {
-      enabled: false;
-    }
-  | ({
-      enabled: true;
-    } & T);
-
-interface GroupAuthorization {
-  type: 'group';
-  group: string;
-}
-
-type AuthorizationConfig = GroupAuthorization;
-
-export interface AuthConfig {
-  config: Omit<UserManagerSettings, 'redirect_uri' | 'response_mode'>;
-  authorization?: WithEnabled<AuthorizationConfig>;
-}
-
-type AuthConfigConditional = WithEnabled<AuthConfig>;
-
-interface JellyfinConfig {
-  host: string;
-  serverId: string;
-}
-
-interface ConfigType {
-  auth: AuthConfigConditional;
-  jellyfin: JellyfinConfig;
-}
 
 export interface ConfigState {
-  state: 'pending' | 'success' | 'error';
-  data: ConfigType | undefined;
-  error: any;
+  data: AdminConfig | undefined;
 }
 
 const initialState: ConfigState = {
-  state: 'pending',
   data: undefined,
-  error: undefined,
 };
 
 export const configSlice = createSlice({
   name: 'config',
   initialState,
   reducers: {
-    loadConfigSuccess: (
+    setConfig: (
       state,
-      { payload: { data } }: PayloadAction<{ data: ConfigType }>,
+      { payload: { data } }: PayloadAction<{ data: AdminConfig }>,
     ) => {
       state.data = data;
-      state.state = 'success';
-    },
-    loadConfigError: (
-      state,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      { payload: { error } }: PayloadAction<{ error: any }>,
-    ) => {
-      state.error = error;
-      state.state = 'error';
     },
   },
 });
 
-const { loadConfigError, loadConfigSuccess } = configSlice.actions;
+export const { setConfig } = configSlice.actions;
 
 export async function loadConfig(dispatch: AppDispatch) {
   try {
-    const resp = await fetch('/config.json');
-    const data = await resp.json();
-    dispatch(loadConfigSuccess({ data }));
+    const { data: response } = await client.query({
+      query: GetConfigDocument,
+    });
+    const data = response.config as ExcludeTypename<typeof response.config>;
+    dispatch(setConfig({ data }));
   } catch (error) {
-    dispatch(loadConfigError({ error }));
+    console.error(error);
   }
 }
 
@@ -84,5 +43,4 @@ const configReducer = configSlice.reducer;
 
 export default configReducer;
 
-export const selectConfigState = (state: RootState) => state.config.state;
 export const selectConfig = (state: RootState) => state.config.data;

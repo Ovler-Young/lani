@@ -41,7 +41,14 @@ export class ImageResolver {
       Bucket: config.s3.bucket,
       Key: cosPath,
     });
-    console.log(url);
-    return url;
+    if (config.s3.publicHost) {
+      const urlObject = new URL(url);
+      const publicUrl = `${config.s3.publicHost}${cosPath}${urlObject.search}`;
+      console.log(publicUrl);
+      return publicUrl;
+    } else {
+      console.log(url);
+      return url;
+    }
   }
 }

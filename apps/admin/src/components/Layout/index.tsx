@@ -2,11 +2,11 @@ import laniText from '@/assets/lani-text.svg';
 import { selectCollapsed, setCollapsed } from '@/store/app';
 import {
   logout,
+  selectAuth,
   selectHasAccountPage,
   selectProfile,
   toAccountPage,
 } from '@/store/auth';
-import { selectConfig } from '@/store/config';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import useMobile from '@/utils/useMobile';
 import {
@@ -113,9 +113,17 @@ function UserProfile({ collapsed }: { collapsed: boolean }) {
             [styles.collapsed]: collapsed,
           })}
         >
-          <Avatar icon={<UserOutlined />} className={styles.avatar} />
+          {profile?.picture ? (
+            <Avatar src={profile.picture} className={styles.avatar} />
+          ) : (
+            <Avatar icon={<UserOutlined />} className={styles.avatar} />
+          )}
           <Typography.Text className={styles.username}>
-            {profile?.preferred_username ?? '用户'}
+            {profile?.preferred_username ??
+              profile?.nickname ??
+              profile?.name ??
+              profile?.email ??
+              '用户'}
           </Typography.Text>
         </div>
       </Popover>
@@ -137,7 +145,7 @@ function UserProfile({ collapsed }: { collapsed: boolean }) {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function Layout(props: any) {
   const collapsed = useAppSelector(selectCollapsed);
-  const config = useAppSelector(selectConfig);
+  const auth = useAppSelector(selectAuth);
   const dispatch = useAppDispatch();
 
   const mobile = useMobile();
@@ -193,7 +201,7 @@ export default function Layout(props: any) {
       }}
       className={styles.layout}
       menuFooterRender={() =>
-        config?.auth?.enabled ? <UserProfile collapsed={collapsed} /> : null
+        auth.config?.enabled ? <UserProfile collapsed={collapsed} /> : null
       }
     />
   );

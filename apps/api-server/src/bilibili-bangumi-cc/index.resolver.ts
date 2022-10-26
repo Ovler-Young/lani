@@ -2,9 +2,7 @@ import { MetadataRefreshMode } from '@/api/jellyfin';
 import { BilibiliBangumiCCService } from '@/bilibili-bangumi-cc/index.service';
 import { BilibiliProxyRegion } from '@/bilibili-bangumi-cc/types';
 import { PrismaService } from '@/common/prisma.service';
-import config from '@/config';
 import { JellyfinHelp } from '@/utils/JellyfinHelp';
-import { resolveChroot } from '@lani/framework';
 import { ConflictException } from '@nestjs/common';
 import { Args, ID, Mutation, Resolver } from '@nestjs/graphql';
 import { DownloadStatus } from '@lani/db';
@@ -57,9 +55,6 @@ export class BilibiliBangumiCCResolver {
       throw new ConflictException('last job does not have filePath');
     }
     const srtPath = filePath.replace(path.extname(filePath), '').concat('.srt');
-    const actualSrtPath = resolveChroot(
-      path.join(config.lani.mediaRoot, srtPath),
-    );
     const srtText = await this.service.downloadSRT(
       bilibiliThmId,
       index,
@@ -67,7 +62,7 @@ export class BilibiliBangumiCCResolver {
       BilibiliProxyRegion.THM,
     );
     console.log(`Writing CC for '${title}' / #${index}...`);
-    await fs.writeFile(actualSrtPath, srtText, 'utf-8');
+    await fs.writeFile(srtPath, srtText, 'utf-8');
     JellyfinHelp.refreshItem({
       itemId: jellyfinEpisodeId,
       metadataRefreshMode: MetadataRefreshMode.FULL_REFRESH,

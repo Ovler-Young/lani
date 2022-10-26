@@ -21,3 +21,13 @@ export class SearchBangumiSeason {
   image?: string;
   added: boolean;
 }
+
+@ObjectType()
+export class JellyfinConfig {
+  publicHost: string;
+}
+
+@ObjectType()
+export class AdminConfig {
+  jellyfin?: JellyfinConfig;
+}

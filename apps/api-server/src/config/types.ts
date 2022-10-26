@@ -1,83 +1,156 @@
-import { PathMapping } from '@/utils/path';
+import {
+  obj,
+  opt,
+  str,
+  arr,
+  ext,
+  kind,
+  enabled,
+  either,
+  num,
+  or,
+  T,
+  root,
+} from '@lani/framework';
 
-export interface QBittorrentConfig {
-  apiEndpoint: string;
-  username: string;
-  password: string;
-}
+const pathMappingConfig = opt(
+  arr(
+    obj({
+      from: str(),
+      to: str(),
+    }),
+  ),
+  [],
+);
 
-export const downloadClientKinds = ['qbittorrent'] as const;
-export type DownloadClientKind = typeof downloadClientKinds[number];
+const qbittorrentConfig = obj({
+  apiEndpoint: str(),
+  publicHost: opt(str()),
+  username: str(),
+  password: str(),
+  pathMapping: pathMappingConfig,
+});
+export type QBittorrentConfig = T<typeof qbittorrentConfig>;
 
-export interface DownloadClientConfig {
-  kind: DownloadClientKind;
-  qbittorrent?: QBittorrentConfig;
-  pathMapping: PathMapping;
-}
+const downloadClientConfig = kind({
+  qbittorrent: qbittorrentConfig,
+});
 
-export interface JellyfinConfig {
-  apiEndpoint: string;
-  apiToken: string;
-  dummyUserId: string;
-  pathMapping: PathMapping;
-  publicHost: string;
-}
+const jellyfinConfig = obj({
+  apiEndpoint: str(),
+  publicHost: opt(str()),
+  apiToken: str(),
+  dummyUserId: str(),
+  pathMapping: pathMappingConfig,
+});
 
-export interface LaniConfig {
-  mediaRoot: string;
-  publicHost: string;
-}
+const laniConfig = opt(
+  obj({
+    moveStrategy: opt(
+      either(
+        ...([
+          'hardLinkOnly',
+          'hardLinkOrCopy',
+          'hardLinkOrMove',
+          'copyOnly',
+          'moveOnly',
+        ] as const),
+      ),
+      'hardLinkOrMove',
+    ),
+    publicHost: opt(str()),
+  }),
+  {
+    moveStrategy: 'hardLinkOrCopy',
+  },
+);
 
-export interface S3Config extends AWS.S3.Types.ClientConfiguration {
-  bucket: string;
-}
+const s3Config = ext<AWS.S3.Types.ClientConfiguration>()(
+  obj({
+    bucket: str(),
+    publicHost: opt(str()),
+  }),
+);
 
-export interface LarkConfig {
-  appId: string;
-  appSecret: string;
-  encryptKey?: string;
-  verificationToken?: string;
-  adminChatId: string;
-}
+const larkConfig = obj({
+  appId: str(),
+  appSecret: str(),
+  encryptKey: opt(str()),
+  verificationToken: opt(str()),
+  adminChatId: str(),
+});
+export type LarkConfig = T<typeof larkConfig>;
 
-export type Enabled<T> = { enabled: false } | ({ enabled: true } & T);
+const notificationsConfig = opt(
+  obj({
+    management: enabled(
+      obj({
+        kind: either('lark'),
+      }),
+    ),
+    user: enabled(
+      obj({
+        kind: either('lark'),
+      }),
+    ),
+    lark: opt(larkConfig),
+  }),
+  {
+    management: { enabled: false },
+    user: { enabled: false },
+  },
+);
 
-export const managementNotificationKinds = ['lark'] as const;
-export type ManagementNotificationKind =
-  typeof managementNotificationKinds[number];
-export const userNotificationKinds = ['lark'] as const;
-export type UserNotificationKind = typeof userNotificationKinds[number];
+const timeoutConfig = opt(
+  or(
+    num(),
+    obj({
+      global: num(),
+      hk: opt(num()),
+      china: num(),
+      local: num(),
+    }),
+  ),
+  {
+    global: 30000,
+    china: 15000,
+    local: 5000,
+  },
+);
 
-export interface NotificationsConfig {
-  management: Enabled<{ kind: ManagementNotificationKind }>;
-  user: Enabled<{ kind: UserNotificationKind }>;
-  lark?: LarkConfig;
-}
+const proxyConfig = opt(
+  or(
+    str(),
+    obj({
+      global: str(),
+      hk: str(),
+    }),
+  ),
+);
 
-export interface TimeoutConfig {
-  global: number;
-  hk: number;
-  local: number;
-  default: number;
-}
+const networkConfig = opt(
+  obj({
+    proxy: proxyConfig,
+    timeout: timeoutConfig,
+  }),
+  {
+    timeout: {
+      global: 30000,
+      hk: undefined,
+      china: 15000,
+      local: 5000,
+    },
+  },
+);
 
-export interface ProxyConfig {
-  hk?: string;
-  global?: string;
-  default?: string;
-}
+export const rootConfig = root({
+  network: networkConfig,
+  postgresUrl: str(),
+  s3: s3Config,
+  downloadClient: downloadClientConfig,
+  jellyfin: jellyfinConfig,
+  notifications: notificationsConfig,
+  lani: laniConfig,
+});
 
-export interface NetworkConfig {
-  proxy: Enabled<ProxyConfig>;
-  timeout: TimeoutConfig;
-}
-
-export interface RootConfig {
-  network: NetworkConfig;
-  postgresUrl: string;
-  s3: S3Config;
-  downloadClient: DownloadClientConfig;
-  jellyfin: JellyfinConfig;
-  notifications: NotificationsConfig;
-  lani: LaniConfig;
-}
+export type RootConfig = T<typeof rootConfig>;

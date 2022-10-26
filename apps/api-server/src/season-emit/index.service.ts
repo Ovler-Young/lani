@@ -11,7 +11,6 @@ import {
   removeDirectoryIdempotent,
   writeXMLFileIdempotent,
 } from '@/utils/idempotency';
-import { resolveChroot } from '@lani/framework';
 import { Injectable } from '@nestjs/common';
 import fs from 'fs/promises';
 import path from 'path';
@@ -38,8 +37,13 @@ export class SeasonEmitService {
 
     // 如果重命名了，自动视为已修改
     let modified = renamed;
-    modified ||= await this.emitNfo(season);
-    modified ||= await this.emitImages(season);
+    // ||=会短路，不能用
+    if (await this.emitNfo(season)) {
+      modified = true;
+    }
+    if (await this.emitImages(season)) {
+      modified = true;
+    }
 
     if (modified) {
       console.log(
@@ -78,12 +82,8 @@ export class SeasonEmitService {
     if (oldTitle === null) {
       throw new Error('oldTitle is null');
     }
-    const oldPath = resolveChroot(
-      path.join(config.lani.mediaRoot, seasonRoot, oldTitle),
-    );
-    const newPath = resolveChroot(
-      path.join(config.lani.mediaRoot, seasonRoot, newTitle),
-    );
+    const oldPath = path.join(seasonRoot, oldTitle);
+    const newPath = path.join(seasonRoot, newTitle);
     // 目录已经存在时会报错，不会覆盖
     await fs.rename(oldPath, newPath);
   }
@@ -98,9 +98,7 @@ export class SeasonEmitService {
     yearAndSemester,
     jellyfinFolder: { location: seasonRoot },
   }: SeasonWithFolderAndImages) {
-    const nfoPath = resolveChroot(
-      path.join(config.lani.mediaRoot, seasonRoot, title, 'tvshow.nfo'),
-    );
+    const nfoPath = path.join(seasonRoot, title, 'tvshow.nfo');
     // https://kodi.wiki/view/NFO_files/TV_shows
     return await writeXMLFileIdempotent(
       nfoPath,
@@ -162,9 +160,7 @@ export class SeasonEmitService {
         }
         const { cosPath, hash } = image;
         const ext = cosPath.substring(cosPath.lastIndexOf('.'));
-        const filePath = resolveChroot(
-          path.join(config.lani.mediaRoot, seasonRoot, title, `${type}${ext}`),
-        );
+        const filePath = path.join(seasonRoot, title, `${type}${ext}`);
         const currentHash = await getFileHash(filePath);
 
         if (hash && currentHash && currentHash === hash) {
@@ -193,9 +189,7 @@ export class SeasonEmitService {
 
   async deleteSeasonFiles(season: SeasonWithJellyfinFolder) {
     const { jellyfinFolder, title } = season;
-    const folderPath = resolveChroot(
-      path.join(config.lani.mediaRoot, jellyfinFolder.location, title),
-    );
+    const folderPath = path.join(jellyfinFolder.location, title);
     await removeDirectoryIdempotent(folderPath);
     await this.seasonJellyfin.refreshAfterDelete(season);
   }

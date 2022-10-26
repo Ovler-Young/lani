@@ -1,0 +1,56 @@
+---
+sidebar_position: 10
+---
+
+# 配置 Jellyfin
+
+用 Jellyfin 的管理员帐号登录，并进入控制台，然后：
+
+### 创建 API 密钥
+
+![创建 API 密钥](/img/jellyfin-create-api-key.png)
+
+创建完成后，记录密钥内容：
+
+![API 密钥创建结果](/img/jellyfin-create-api-key-result.png)
+
+### 创建用户
+
+由于 [Jellyfin 的问题](https://github.com/jellyfin/jellyfin/issues/2246)，目前 lani 运行时需要提供一个能够访问全部媒体库的用户，像：
+
+![能够访问全部媒体库的用户](/img/jellyfin-user-access-all-folders.png)
+
+你可以使用现有的用户，或者创建一个：
+
+![创建用户](/img/jellyfin-create-user.png)
+
+最后，请记录用户 ID：
+
+![记录用户 ID](/img/jellyfin-record-user-id.png)
+
+### API 地址与网址
+
+API 地址（`apiEndpoint`）用于调用 Jellyfin API，它可以是本地地址（比如 `http://localhost:8080`，此时的 `localhost` 指向的是部署 lani 的服务器，从浏览器无法打开）。
+
+网址（`publicHost`）用于生成跳转到 Jellyfin 的链接，它应当能从浏览器直接打开。当未配置网址时，会认为 Jellyfin 无法从浏览器访问，从而隐藏对应的链接。
+
+### YAML 配置
+
+完整配置如下：
+
+```yaml
+jellyfin:
+  apiEndpoint: <Jellyfin API 地址>
+  apiToken: <你的 API 密钥>
+  dummyUserId: <用户 ID>
+  pathMapping: <路径映射（可选）>
+  publicHost: <Jellyfin 网址（可选）>
+```
+
+关于路径映射，详见 [配置文件系统](./file-system)。
+
+:::warning
+
+启动 lani 之后，**请勿**在 Jellyfin 中删除通过 lani 创建的动画，以及存在 lani 创建的动画的媒体库。如有需要，请先在 lani 中删除。
+
+:::

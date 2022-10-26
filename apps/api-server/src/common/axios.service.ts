@@ -8,21 +8,26 @@ import axios, {
 } from 'axios';
 import createHttpsProxyAgent from 'https-proxy-agent';
 
-function getAxiosConfig(
-  key: keyof typeof config.network.timeout,
+export function getAxiosConfig(
+  key: 'global' | 'hk' | 'local' | 'china',
 ): AxiosRequestConfig {
   // 本地不使用 proxy
   const proxy =
     key === 'local'
       ? undefined
-      : config.network.proxy.enabled
-      ? config.network.proxy[key]
+      : config.network.proxy !== undefined
+      ? typeof config.network.proxy === 'string'
+        ? config.network.proxy
+        : key === 'hk'
+        ? config.network.proxy.hk ?? config.network.proxy.global
+        : config.network.proxy[key]
       : undefined;
   const timeout =
-    typeof config.network.timeout[key] === 'number' &&
-    config.network.timeout[key] > 0
-      ? config.network.timeout[key]
-      : undefined;
+    typeof config.network.timeout === 'number'
+      ? config.network.timeout
+      : key === 'hk'
+      ? config.network.timeout.hk ?? config.network.timeout.global
+      : config.network.timeout[key];
   return {
     httpsAgent: proxy ? createHttpsProxyAgent(proxy) : undefined,
     timeout,
@@ -73,7 +78,7 @@ export class HKAxiosService extends AxiosService {
 @Injectable()
 export class ChinaAxiosService extends AxiosService {
   constructor() {
-    super(getAxiosConfig('default'));
+    super(getAxiosConfig('china'));
   }
 }
 

@@ -1,20 +1,11 @@
-const fs = require('fs');
-const dotenv = require('dotenv');
-
-function readEnvFile(envName, defaultFile) {
-  const envFile = process.env[envName] || defaultFile
-  try {
-    fs.statSync(envFile);
-  } catch (error) {
-    // file does not exist, ignore the error
-    return {}
+function getEnvironment(prefix) {
+  const envs = {};
+  for (const key in process.env) {
+    if (key.startsWith(prefix)) {
+      envs[key.replace(prefix, '')] = process.env[key];
+    }
   }
-  // this part will throw error if file is not
-  // readable or not a valid .env file, this is
-  // the expected behavior
-  const content = fs.readFileSync(envFile);
-  const config = dotenv.parse(content);
-  return config;
+  return envs;
 }
 
 const apps = [
@@ -25,7 +16,7 @@ const apps = [
     args: "run start:prod",
     env: {
       PORT: 8082,
-      ...readEnvFile('API_SERVER_ENV', '/deploy/apps/api-server/.env'),
+      ...getEnvironment('API_SERVER_'),
     },
     autorestart: true,
   },
@@ -36,7 +27,7 @@ const apps = [
     args: "run start",
     env: {
       PORT: 8083,
-      ...readEnvFile('DATA_SERVER_ENV', '/deploy/apps/data-server/.env'),
+      ...getEnvironment('DATA_SERVER_'),
     },
     autorestart: true,
   },
@@ -47,10 +38,29 @@ const apps = [
     args: "run start",
     env: {
       PORT: 8081,
-      ...readEnvFile('GATEWAY_ENV', '/deploy/apps/gateway/.env'),
+      ...getEnvironment('GATEWAY_'),
     },
     autorestart: true,
   },
+  {
+    name: "minio",
+    script: "minio",
+    cwd: "/storage",
+    args: "server /storage --console-address 0.0.0.0:9001",
+    env: {
+      ...getEnvironment('MINIO_'),
+    },
+    autorestart: true,
+  },
+  {
+    name: "nginx",
+    script: "nginx",
+    args: '-g "daemon off;"',
+    env: {
+      ...getEnvironment('NGINX_')
+    },
+    autorestart: true,
+  }
 ];
 
 module.exports = apps;

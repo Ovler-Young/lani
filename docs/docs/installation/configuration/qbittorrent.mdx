@@ -1,0 +1,28 @@
+---
+sidebar_position: 30
+---
+
+# 配置 qBittorrent
+
+### API 地址与网址
+
+API 地址（`apiEndpoint`）用于调用 qBittorrent API，它可以是本地地址（比如 `http://localhost:8080`，此时的 `localhost` 指向的是部署 lani 的服务器，从浏览器无法打开）。
+
+网址（`publicHost`）用于生成跳转到 qBittorrent 的链接，它应当能从浏览器直接打开。当未配置网址时，会认为 qBittorrent 无法从浏览器访问，从而隐藏对应的链接。
+
+### YAML 配置
+
+qBittorrent 完整配置如下：
+
+```yaml
+downloadClient:
+  kind: qbittorrent
+  qbittorrent:
+    apiEndpoint: <qBittorrent API 地址>
+    username: <密码>
+    password: <密码>
+    publicHost: <qBittorrent 网址（可选）>
+  pathMapping: <路径映射（可选）>
+```
+
+关于路径映射，详见 [配置文件系统](./file-system)。

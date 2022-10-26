@@ -1,4 +1,4 @@
-import useAppClient from '@/client/hooks';
+import { client } from '@/client';
 import Layout from '@/components/Layout';
 import { store } from '@/store';
 import { initAuth } from '@/store/auth';
@@ -21,12 +21,11 @@ export default function App(props: any) {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function AppInner(props: any) {
   const dispatch = useAppDispatch();
-  useMount(async () => {
-    await dispatch(loadConfig);
-    await dispatch(initAuth);
-  });
 
-  const client = useAppClient();
+  useMount(async () => {
+    await dispatch(initAuth);
+    await dispatch(loadConfig);
+  });
 
   return (
     <ApolloProvider client={client}>

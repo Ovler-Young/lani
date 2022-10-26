@@ -4,7 +4,6 @@ import config from '@/config';
 import { mapPath } from '@/utils/path';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ID, Mutation, Resolver } from '@nestjs/graphql';
-import path from 'path';
 
 @Injectable()
 @Resolver()
@@ -12,9 +11,7 @@ export class JellyfinSyncService implements OnModuleInit {
   constructor(private prisma: PrismaService) {}
 
   private getMappedFolderLocation(location: string) {
-    const mappedLocation = mapPath(config.jellyfin.pathMapping, location);
-    const relative = path.relative(config.lani.mediaRoot, mappedLocation);
-    return relative;
+    return mapPath(config.jellyfin.pathMapping, location);
   }
 
   @Mutation(() => ID)
