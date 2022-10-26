@@ -46,14 +46,17 @@ const jellyfinConfig = obj({
 
 const laniConfig = opt(
   obj({
-    moveStrategy: either(
-      ...([
-        'hardLinkOnly',
-        'hardLinkOrCopy',
-        'hardLinkOrMove',
-        'copyOnly',
-        'moveOnly',
-      ] as const),
+    moveStrategy: opt(
+      either(
+        ...([
+          'hardLinkOnly',
+          'hardLinkOrCopy',
+          'hardLinkOrMove',
+          'copyOnly',
+          'moveOnly',
+        ] as const),
+      ),
+      'hardLinkOrMove',
     ),
     publicHost: opt(str()),
   }),
