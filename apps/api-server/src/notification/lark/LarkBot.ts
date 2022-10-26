@@ -178,11 +178,16 @@ export class LarkBot
               tag: 'text',
               text: `${index + 1}.`,
             },
-            {
-              tag: 'a',
-              text: episode.season.title,
-              href: `${config.lani.publicHost}/season/${episode.season.id}`,
-            },
+            config.lani.publicHost
+              ? {
+                  tag: 'a',
+                  text: episode.season.title,
+                  href: `${config.lani.publicHost}/season/${episode.season.id}`,
+                }
+              : {
+                  tag: 'text',
+                  text: episode.season.title,
+                },
             {
               tag: 'text',
               text: ` #${episode.index} (发布于 ${dayjs(episode.airTime).format(
@@ -201,28 +206,30 @@ export class LarkBot
               tag: 'text',
               text: `以上剧集截止 ${now} 已经缺少超过 12 小时，请及时处理`,
             },
-          ],
-          [
-            {
-              tag: 'text',
-              text: '相关链接：',
-            },
-            {
-              tag: 'a',
-              href: `${config.lani.publicHost}/seasons?f_episodes=lack&f_isMonitoring=true`,
-              text: '缺集季度',
-            },
-            {
-              tag: 'text',
-              text: '、',
-            },
-            {
-              tag: 'a',
-              href: `${config.lani.publicHost}/jobs`,
-              text: '下载任务',
-            },
-          ],
-        ],
+          ] as LarkPostTag[],
+          config.lani.publicHost
+            ? ([
+                {
+                  tag: 'text',
+                  text: '相关链接：',
+                },
+                {
+                  tag: 'a',
+                  href: `${config.lani.publicHost}/seasons?f_episodes=lack&f_isMonitoring=true`,
+                  text: '缺集季度',
+                },
+                {
+                  tag: 'text',
+                  text: '、',
+                },
+                {
+                  tag: 'a',
+                  href: `${config.lani.publicHost}/jobs`,
+                  text: '下载任务',
+                },
+              ] as LarkPostTag[])
+            : undefined,
+        ].filter((x): x is Exclude<typeof x, undefined> => x !== undefined),
       }),
     );
   }
