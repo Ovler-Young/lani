@@ -4,6 +4,7 @@ import { IDownloadClient } from '@/download-job/client/IDownloadClient';
 import { VIDEO_FILE_MATCHER } from '@/download-job/types';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import path from 'path';
 
 @Injectable()
 export class FindVideoFileAtom extends AsyncAtom<
@@ -30,7 +31,7 @@ export class FindVideoFileAtom extends AsyncAtom<
       throw new Error('No video file found or multiple video files');
     }
     return {
-      importPath: `${steps.download.downloadPath}${videoFile.path}`,
+      importPath: path.join(steps.download.downloadPath, videoFile.path),
     };
   }
 }
