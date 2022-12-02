@@ -3,24 +3,24 @@ import { selectConfig } from '@/store/config';
 
 export function jellyfinEpisodeLink(jellyfinEpisodeId: string) {
   const config = selectConfig(store.getState());
-  if (!config) {
+  if (!config?.jellyfin) {
     return '';
   }
   const {
-    jellyfin: { publicHost, serverId },
+    jellyfin: { publicHost },
   } = config;
-  return `${publicHost}/web/index.html#!/details?serverId=${serverId}&id=${jellyfinEpisodeId}`;
+  return `${publicHost}/web/index.html#!/details?id=${jellyfinEpisodeId}`;
 }
 
 export function jellyfinSeasonLink(jellyfinSeasonId: string) {
   const config = selectConfig(store.getState());
-  if (!config) {
+  if (!config?.jellyfin) {
     return '';
   }
   const {
-    jellyfin: { publicHost, serverId },
+    jellyfin: { publicHost },
   } = config;
-  return `${publicHost}/web/index.html#!/details?serverId=${serverId}&id=${jellyfinSeasonId}`;
+  return `${publicHost}/web/index.html#!/details?id=${jellyfinSeasonId}`;
 }
 
 export function bilibiliSeasonLink(ssid: string) {
